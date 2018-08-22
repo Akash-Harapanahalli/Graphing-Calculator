@@ -1,0 +1,41 @@
+{
+  "name": "Graphing-Calculator",
+  "version": "1.0.0",
+  "description": "Graphing-Calculator",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --open",
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akash-Harapanahalli/Graphing-Calculator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akash-Harapanahalli/Graphing-Calculator/issues"
+  },
+  "homepage": "https://github.com/Akash-Harapanahalli/Graphing-Calculator#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "webpack": "^4.16.5",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.5"
+  },
+  "dependencies": {
+    "@material-ui/core": "^1.5.1",
+    "mathjs": "^5.1.0",
+    "node-mathquill": "^0.10.2",
+    "react-splitter-layout": "^3.0.1"
+  }
+}
