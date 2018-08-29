@@ -24,18 +24,23 @@
     "babel-loader": "^7.1.5",
     "babel-preset-env": "^1.7.0",
     "babel-preset-react": "^6.24.1",
+    "css-loader": "^1.0.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.2",
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
-    "webpack": "^4.16.5",
+    "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.5"
   },
   "dependencies": {
     "@material-ui/core": "^1.5.1",
-    "mathjs": "^5.1.0",
-    "node-mathquill": "^0.10.2",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "file-loader": "^2.0.0",
+    "jquery": "^3.3.1",
+    "mathjs": "^5.1.1",
+    "mathquill": "git+https://github.com/luxp/mathquill-webpack.git",
     "react-splitter-layout": "^3.0.1"
   }
 }

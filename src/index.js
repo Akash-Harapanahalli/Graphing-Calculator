@@ -13,7 +13,19 @@ let app = ReactDOM.render(<App />, document.getElementById("app"));
 app.graph.fullscreen();
 app.graph.graph(app.getFunction());
 
+app.graph.set_dPixel(0.1);
+
 app.buttonOnClick = function(e) {
 	app.graph.fullscreen();
 	app.graph.graph(app.getFunction());
+	try{
+		console.log("Zeros: " + app.graph.fzeros());
+	} catch(err){
+		// Just do nothing LOL
+	}
+}
+
+app.graph.mousemove = function(e){
+	console.log("yay");
+	app.buttonOnClick();
 }

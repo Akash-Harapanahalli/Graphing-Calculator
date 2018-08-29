@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import math from "mathjs";
+import brent from "./brent.js";
 
 export default class Graph extends React.Component {
 	constructor(props){
@@ -33,7 +34,7 @@ export default class Graph extends React.Component {
 	        kP: 1
 		}
 		this.f;
-		this.dPixel; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
+		this.dPixel = 2; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
 		this.inv_dx, this.inv_dy, this.x, this.prev_x, this.y, this.prev_y;
 	}
 	render(){
@@ -50,10 +51,16 @@ export default class Graph extends React.Component {
 	}
 	graph(_f){
 		this.f = _f;
-		this.recalculate();
-		this.axes();
-		this.plot();
-		this.border();
+		try {
+			this.recalculate();
+			this.axes();
+			this.plot();
+			this.border();
+		} catch (err){
+			console.log(err);
+			this.axes();
+			this.border();
+		}
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -71,13 +78,17 @@ export default class Graph extends React.Component {
 		this.ctx.fillStyle = _color;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	}
+	set_dPixel(_){
+		this.dPixel = _;
+	}
 	recalculate(){
 		this.general.x.pixelCount = this.canvas.width;
 		this.general.y.pixelCount = this.canvas.height;
 		this.general.x.origin = ((0 - this.general.x.min) / (this.general.x.max - this.general.x.min)) * this.general.x.pixelCount;
-        this.general.y.origin = ((this.general.y.max) / (this.general.y.max - this.general.y.min)) * (this.general.y.pixelCount);
 
-        this.dPixel = 2;
+		this.general.y.min = (this.general.y.origin / this.general.x.origin) * this.general.x.min;
+		this.general.y.max = (this.general.y.origin / this.general.x.origin) * this.general.x.max;
+        this.general.y.origin = ((this.general.y.max) / (this.general.y.max - this.general.y.min)) * (this.general.y.pixelCount);
 
         this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
         this.dy = (this.dPixel * (this.general.y.max - this.general.y.min)) / this.general.y.pixelCount;
@@ -93,76 +104,120 @@ export default class Graph extends React.Component {
         this.prev_y = math.eval(this.f, {"x": this.prev_x});
 	}
 	axes(){
+		let count = 0;
 		for(let i = this.general.x.origin; i < this.general.x.pixelCount; i += this.inv_dx){
-            this.drawLine({
-                strokeStyle: "#aaaaaa",
-                strokeWidth: 1,
-                x1: i, y1: 0,
-                x2: i, y2: this.general.y.pixelCount
-            });
+			if(!(count % 2)){
+	            this.drawLine({
+	                strokeStyle: "#000000",
+	                strokeWidth: 0.5,
+	                x1: i, y1: 0,
+	                x2: i, y2: this.general.y.pixelCount
+	            });
+        	} else {
+        		this.drawLine({
+	                strokeStyle: "#aaaaaa",
+	                strokeWidth: 0.5,
+	                x1: i, y1: 0,
+	                x2: i, y2: this.general.y.pixelCount
+	            });
+        	}
+        	count++;
         }
+        count = 0;
         for(let i = this.general.x.origin; i > 0; i -= this.inv_dx){
-            this.drawLine({
-                strokeStyle: "#aaaaaa",
-                strokeWidth: 1,
-                x1: i, y1: 0,
-                x2: i, y2: this.general.y.pixelCount
-            });
+            if(!(count % 2)){
+            	this.drawLine({
+	                strokeStyle: "#000000",
+	                strokeWidth: 0.5,
+	                x1: i, y1: 0,
+	                x2: i, y2: this.general.y.pixelCount
+           		});
+            } else {
+	            this.drawLine({
+	                strokeStyle: "#aaaaaa",
+	                strokeWidth: 0.5,
+	                x1: i, y1: 0,
+	                x2: i, y2: this.general.y.pixelCount
+	            });
+        	}
+        	count++;
         }
+        count = 0;
         for(let i = this.general.y.origin; i < this.general.y.pixelCount; i += this.inv_dy){
-            this.drawLine({
-                strokeStyle: "#aaaaaa",
-                strokeWidth: 1,
-                x1: 0, y1: i,
-                x2: this.general.x.pixelCount, y2: i
-            });
+        	if(!(count % 2)){
+	            this.drawLine({
+	                strokeStyle: "#000000",
+	                strokeWidth: 0.5,
+	                x1: 0, y1: i,
+	                x2: this.general.x.pixelCount, y2: i
+	            });
+        	} else {
+        		this.drawLine({
+	                strokeStyle: "#aaaaaa",
+	                strokeWidth: 0.5,
+	                x1: 0, y1: i,
+	                x2: this.general.x.pixelCount, y2: i
+	            });
+        	}
+        	count++;
         }
+        count = 0;
         for(let i = this.general.y.origin; i > 0; i -= this.inv_dy){
-            this.drawLine({
-                strokeStyle: "#aaaaaa",
-                strokeWidth: 1,
-                x1: 0, y1: i,
-                x2: this.general.x.pixelCount, y2: i
-            });
+        	if(!(count % 2)){
+	            this.drawLine({
+	                strokeStyle: "#000000",
+	                strokeWidth: 0.5,
+	                x1: 0, y1: i,
+	                x2: this.general.x.pixelCount, y2: i
+	            });
+        	} else {
+        		this.drawLine({
+	                strokeStyle: "#aaaaaa",
+	                strokeWidth: 0.5,
+	                x1: 0, y1: i,
+	                x2: this.general.x.pixelCount, y2: i
+	            });
+        	}
+        	count++;
         }
 		this.drawLine({
             strokeStyle: "#000000",
-            strokeWidth: 2,
+            strokeWidth: 1.5,
             x1: this.general.x.origin, y1: 0,
             x2: this.general.x.origin, y2: this.canvas.height
         });
         this.drawLine({
             strokeStyle: "#000000",
-            strokeWidth: 2,
+            strokeWidth: 1.5,
             x1: 0, y1: this.general.y.origin,
             x2: this.canvas.width, y2: this.general.y.origin
         });
 	}
 	border(){
-		// this.drawLine({
-  //           strokeStyle: "#ffffff",
-  //           strokeWidth: 10,
-  //           x1: 5, y1: 0,
-  //           x2: 5, y2: this.canvas.height
-  //       });
-  //       this.drawLine({
-  //           strokeStyle: "#ffffff",
-  //           strokeWidth: 10,
-  //           x1: 0, y1: 5,
-  //           x2: this.canvas.width, y2: 5
-  //       });
-  //       this.drawLine({
-  //           strokeStyle: "#ffffff",
-  //           strokeWidth: 10,
-  //           x1: this.canvas.width - 5, y1: 0,
-  //           x2: this.canvas.width - 5, y2: this.canvas.height
-  //       });
-  //       this.drawLine({
-  //           strokeStyle: "#ffffff",
-  //           strokeWidth: 10,
-  //           x1: 0, y1: this.canvas.height - 5,
-  //           x2: this.canvas.width, y2: this.canvas.height - 5
-  //       });
+		this.drawLine({
+            strokeStyle: "#ffffff",
+            strokeWidth: 10,
+            x1: 5, y1: 0,
+            x2: 5, y2: this.canvas.height
+        });
+        this.drawLine({
+            strokeStyle: "#ffffff",
+            strokeWidth: 10,
+            x1: 0, y1: 5,
+            x2: this.canvas.width, y2: 5
+        });
+        this.drawLine({
+            strokeStyle: "#ffffff",
+            strokeWidth: 10,
+            x1: this.canvas.width - 5, y1: 0,
+            x2: this.canvas.width - 5, y2: this.canvas.height
+        });
+        this.drawLine({
+            strokeStyle: "#ffffff",
+            strokeWidth: 10,
+            x1: 0, y1: this.canvas.height - 5,
+            x2: this.canvas.width, y2: this.canvas.height - 5
+        });
 	}
 	plot(){
 		while(this.x < this.general.x.max){
@@ -203,13 +258,15 @@ export default class Graph extends React.Component {
         }
 	}
 	fullscreen(){
-		this.resize((document.getElementById("graphDIV").offsetWidth),
+		this.resize((document.getElementById("graphDIV").offsetWidth - 5),
 					(window.innerHeight - document.getElementById("graphDIV").offsetTop - 15));
-		this.resize((document.getElementById("graphDIV").offsetWidth),
-					(window.innerHeight - document.getElementById("graphDIV").offsetTop - 8));
+		this.resize((document.getElementById("graphDIV").offsetWidth - 5),
+					(window.innerHeight - document.getElementById("graphDIV").offsetTop - 15));
+	}
+	fzeros(){
+		return brent(this.general.x.min, this.general.x.max, 100, this.f);
+	}
+	mousemove(e){
+		// TO BE OVERRIDDEN
 	}
 };
-
-Graph.prototype.mousemove = (e) => {
-	console.log("prototype");
-}
