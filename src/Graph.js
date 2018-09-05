@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 
 import math from "mathjs";
 import brent from "./brent.js";
@@ -9,6 +8,7 @@ export default class Graph extends React.Component {
 		super(props);
 		this.canvas;
 		this.ctx;
+		this.container;
 		this.mousemove;
 		this.general = {
 			x: {
@@ -36,6 +36,12 @@ export default class Graph extends React.Component {
 		this.f;
 		this.dPixel = 2; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
 		this.inv_dx, this.inv_dy, this.x, this.prev_x, this.y, this.prev_y;
+
+		this.f_;
+
+		// this.f_ = function(_){
+		// 	(math.eval(f, {x: (_ + this.dx)}) - math.eval(f, {x: (_ + this.dx)})) / this.dx;
+		// }
 	}
 	render(){
 		return (
@@ -48,6 +54,7 @@ export default class Graph extends React.Component {
 	componentDidMount(){
 		this.canvas = document.getElementById(this.props.id);
 		this.ctx = this.canvas.getContext('2d');
+		this.container = document.getElementById(this.props.container);
 	}
 	graph(_f){
 		this.f = _f;
@@ -57,10 +64,10 @@ export default class Graph extends React.Component {
 			this.plot();
 			this.border();
 		} catch (err){
-			console.log(err);
 			this.axes();
 			this.border();
 		}
+		this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -80,6 +87,17 @@ export default class Graph extends React.Component {
 	}
 	set_dPixel(_){
 		this.dPixel = _;
+	}
+	setDR(_){
+		if(_.xMin) this.general.x.min = _.xMin;
+		if(_.xMax) this.general.x.max = _.xMax;
+		if(_.yMin) this.general.y.min = _.yMin;
+		if(_.yMax) this.general.y.max = _.yMax;
+	}
+	writeText(text, x, y) {
+		this.ctx.fillStyle = "#000000";
+		this.ctx.font = "black 20px Arial"
+		this.ctx.fillText(text, x, y); 
 	}
 	recalculate(){
 		this.general.x.pixelCount = this.canvas.width;
@@ -113,6 +131,7 @@ export default class Graph extends React.Component {
 	                x1: i, y1: 0,
 	                x2: i, y2: this.general.y.pixelCount
 	            });
+	            this.writeText(count, i + 5, this.general.y.origin + 12);
         	} else {
         		this.drawLine({
 	                strokeStyle: "#aaaaaa",
@@ -132,6 +151,9 @@ export default class Graph extends React.Component {
 	                x1: i, y1: 0,
 	                x2: i, y2: this.general.y.pixelCount
            		});
+           		if(count != 0){
+           			this.writeText(-count, i + 5, this.general.y.origin + 12);
+           		}
             } else {
 	            this.drawLine({
 	                strokeStyle: "#aaaaaa",
@@ -151,6 +173,9 @@ export default class Graph extends React.Component {
 	                x1: 0, y1: i,
 	                x2: this.general.x.pixelCount, y2: i
 	            });
+	            if(count != 0){
+           			this.writeText(-count, this.general.x.origin + 5, i + 13);
+           		}
         	} else {
         		this.drawLine({
 	                strokeStyle: "#aaaaaa",
@@ -170,6 +195,9 @@ export default class Graph extends React.Component {
 	                x1: 0, y1: i,
 	                x2: this.general.x.pixelCount, y2: i
 	            });
+	            if(count != 0){
+	            	this.writeText(-count, this.general.x.origin + 5, i + 13);
+	        	}
         	} else {
         		this.drawLine({
 	                strokeStyle: "#aaaaaa",
@@ -258,13 +286,16 @@ export default class Graph extends React.Component {
         }
 	}
 	fullscreen(){
-		this.resize((document.getElementById("graphDIV").offsetWidth - 5),
-					(window.innerHeight - document.getElementById("graphDIV").offsetTop - 15));
-		this.resize((document.getElementById("graphDIV").offsetWidth - 5),
-					(window.innerHeight - document.getElementById("graphDIV").offsetTop - 15));
+		this.resize((this.container.offsetWidth - 5),
+					(window.innerHeight - this.container.offsetTop - 15));
+		this.resize((this.container.offsetWidth - 5),
+					(window.innerHeight - this.container.offsetTop - 15));
 	}
 	fzeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this.f);
+	}
+	f_zeros(){
+		return brent(this.general.x.min, this.general.x.max, 100, this.f_);
 	}
 	mousemove(e){
 		// TO BE OVERRIDDEN
