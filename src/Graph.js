@@ -18,21 +18,23 @@ export default class Graph extends React.Component {
 	            origin: 500
 	        },
 	        y: {
-	            min: -5,
-	            max: 5,
+	            min: -10,
+	            max: 10,
 	            pixelCount: 800,
 	            origin: 500
 	        },
-	        isRefreshing: true
+	        isRefreshing: true,
+	        f_: true,
+	        f__: true
 		};
-		this.finds = {
-			x: this.general.x.min,
-	        y: 0,
-	        prev_x: 0,
-	        prev_y: 0,
-	        dx: 0.1,
-	        kP: 1
-		}
+		// this.finds = {
+		// 	x: this.general.x.min,
+	 //        y: 0,
+	 //        prev_x: 0,
+	 //        prev_y: 0,
+	 //        dx: 0.1,
+	 //        kP: 1
+		// }
 		this.f;
 		this.dPixel = 2; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
 		this.inv_dx, this.inv_dy, this.x, this.prev_x, this.y, this.prev_y;
@@ -64,10 +66,12 @@ export default class Graph extends React.Component {
 			this.plot();
 			this.border();
 		} catch (err){
+			console.log(err);
 			this.axes();
 			this.border();
 		}
 		this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
+		this._f = "1 / (" + this.f + ")";
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -88,11 +92,13 @@ export default class Graph extends React.Component {
 	set_dPixel(_){
 		this.dPixel = _;
 	}
-	setDR(_){
-		if(_.xMin) this.general.x.min = _.xMin;
-		if(_.xMax) this.general.x.max = _.xMax;
-		if(_.yMin) this.general.y.min = _.yMin;
-		if(_.yMax) this.general.y.max = _.yMax;
+	setValues(_){
+		this.general.x.min = math.eval(_.xMin);
+		this.general.x.max = math.eval(_.xMax);
+		this.general.y.min = math.eval(_.yMin);
+		this.general.y.max = math.eval(_.yMax);
+		this.general.f_ = _.f_;
+		this.general.f__ = _.f__;
 	}
 	writeText(text, x, y) {
 		this.ctx.fillStyle = "#000000";
@@ -103,9 +109,6 @@ export default class Graph extends React.Component {
 		this.general.x.pixelCount = this.canvas.width;
 		this.general.y.pixelCount = this.canvas.height;
 		this.general.x.origin = ((0 - this.general.x.min) / (this.general.x.max - this.general.x.min)) * this.general.x.pixelCount;
-
-		this.general.y.min = (this.general.y.origin / this.general.x.origin) * this.general.x.min;
-		this.general.y.max = (this.general.y.origin / this.general.x.origin) * this.general.x.max;
         this.general.y.origin = ((this.general.y.max) / (this.general.y.max - this.general.y.min)) * (this.general.y.pixelCount);
 
         this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
@@ -123,7 +126,15 @@ export default class Graph extends React.Component {
 	}
 	axes(){
 		let count = 0;
-		for(let i = this.general.x.origin; i < this.general.x.pixelCount; i += this.inv_dx){
+		let scalar = {
+			x: Math.ceil(( (this.general.x.max - this.general.x.min) * 50 ) / this.canvas.width),
+			y: Math.ceil(( (this.general.y.max - this.general.y.min) * 50 ) / this.canvas.height)
+		}
+		let pixels = {
+			x: this.inv_dx * scalar.x,
+			y: this.inv_dy * scalar.y
+		}
+		for(let i = this.general.x.origin; i < this.general.x.pixelCount; i += pixels.x){
 			if(!(count % 2)){
 	            this.drawLine({
 	                strokeStyle: "#000000",
@@ -131,7 +142,7 @@ export default class Graph extends React.Component {
 	                x1: i, y1: 0,
 	                x2: i, y2: this.general.y.pixelCount
 	            });
-	            this.writeText(count, i + 5, this.general.y.origin + 12);
+	            this.writeText((count * scalar.x), i + 5, this.general.y.origin + 12);
         	} else {
         		this.drawLine({
 	                strokeStyle: "#aaaaaa",
@@ -143,7 +154,7 @@ export default class Graph extends React.Component {
         	count++;
         }
         count = 0;
-        for(let i = this.general.x.origin; i > 0; i -= this.inv_dx){
+        for(let i = this.general.x.origin; i > 0; i -= pixels.x){
             if(!(count % 2)){
             	this.drawLine({
 	                strokeStyle: "#000000",
@@ -152,7 +163,7 @@ export default class Graph extends React.Component {
 	                x2: i, y2: this.general.y.pixelCount
            		});
            		if(count != 0){
-           			this.writeText(-count, i + 5, this.general.y.origin + 12);
+           			this.writeText(-(count * scalar.x), i + 5, this.general.y.origin + 12);
            		}
             } else {
 	            this.drawLine({
@@ -165,16 +176,16 @@ export default class Graph extends React.Component {
         	count++;
         }
         count = 0;
-        for(let i = this.general.y.origin; i < this.general.y.pixelCount; i += this.inv_dy){
+        for(let i = this.general.y.origin; i < this.general.y.pixelCount; i += pixels.y){
         	if(!(count % 2)){
-	            this.drawLine({
+	            this.drawLine({	
 	                strokeStyle: "#000000",
 	                strokeWidth: 0.5,
 	                x1: 0, y1: i,
 	                x2: this.general.x.pixelCount, y2: i
 	            });
 	            if(count != 0){
-           			this.writeText(-count, this.general.x.origin + 5, i + 13);
+           			this.writeText((count * scalar.y), this.general.x.origin + 5, i + 13);
            		}
         	} else {
         		this.drawLine({
@@ -185,9 +196,9 @@ export default class Graph extends React.Component {
 	            });
         	}
         	count++;
-        }
+        }  
         count = 0;
-        for(let i = this.general.y.origin; i > 0; i -= this.inv_dy){
+        for(let i = this.general.y.origin; i > 0; i -= pixels.y){
         	if(!(count % 2)){
 	            this.drawLine({
 	                strokeStyle: "#000000",
@@ -196,7 +207,7 @@ export default class Graph extends React.Component {
 	                x2: this.general.x.pixelCount, y2: i
 	            });
 	            if(count != 0){
-	            	this.writeText(-count, this.general.x.origin + 5, i + 13);
+	            	this.writeText(-(count * scalar.y), this.general.x.origin + 5, i + 13);
 	        	}
         	} else {
         		this.drawLine({
@@ -260,23 +271,23 @@ export default class Graph extends React.Component {
                 x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.y * -this.inv_dy + this.general.y.origin))
             });
 
-            // if(document.getElementById("f'(x)").checked){
+            if(this.general.f_){
                 this.drawLine({
                     strokeStyle: "#ff0000",
                     strokeWidth: 3,
                     x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_dy/this.dx) * -this.inv_dy + this.general.y.origin),
                     x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.dy/this.dx) * -this.inv_dy + this.general.y.origin)
                 });
-            // }
+            }
 
-            // if(document.getElementById("f''(x)").checked){
+            if(this.general.f__){
                 this.drawLine({
                     strokeStyle: "#00ff00",
                     strokeWidth: 3,
                     x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin),
                     x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin)
                 });
-            // }
+            }
 
             this.prev_x = this.x;
             this.prev_y = this.y;
@@ -296,6 +307,9 @@ export default class Graph extends React.Component {
 	}
 	f_zeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this.f_);
+	}
+	_fzeros(){
+		return brent(this.general.x.min, this.general.x.max, 100, this._f);
 	}
 	mousemove(e){
 		// TO BE OVERRIDDEN

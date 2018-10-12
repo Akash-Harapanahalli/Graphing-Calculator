@@ -15,7 +15,8 @@ export default class App extends React.Component {
 			textBoxSize: {
 				fontSize: 50
 			}
-		}
+		};
+		this.points;
 	}
 	refresh(e){
 		// TO BE OVERRIDEN
@@ -26,9 +27,15 @@ export default class App extends React.Component {
 			xMin: document.getElementById("xMin").value,
 			xMax: document.getElementById("xMax").value,
 			yMin: document.getElementById("yMin").value,
-			yMax: document.getElementById("yMax").value
+			yMax: document.getElementById("yMax").value,
+			f_: document.getElementById("f'(x)").checked,
+			f__: document.getElementById("f''(x)").checked
 		}
 	}
+	setValues(_){
+		document.getElementById("ZeroSpan").textContent = "x = " + _.zeros;
+		document.getElementById("CritSpan").textContent = "x = " + _.crit;
+	} 
 	render() {
 	    return (
 	        <div> 
@@ -48,6 +55,19 @@ export default class App extends React.Component {
 				        		onChange={() => { this.refresh(); }}
 				        	/>
 			        	</span>
+			        	<br/>
+			        	f'(x)
+			        	<Checkbox
+			        		id="f'(x)"
+			        		onChange={() => { this.refresh(); }}
+			        		defaultChecked={false}
+						/>
+			        	f''(x)
+			        	<Checkbox
+			        		id="f''(x)"
+			        		onChange={() => { this.refresh(); }}
+			        		defaultChecked={false}
+			        	/>
 			        	<br/>
 			        	<span>
 			        		D: [ 
@@ -86,6 +106,18 @@ export default class App extends React.Component {
 			        	<div>
 			            	<Button style={{width: '100%', height: '100px'}} variant="contained" color="secondary" onClick={() => { this.refresh(); }}>Graph</Button>
 			            </div>
+			            <br/>
+		            	Zeros: 
+		            	<br/>
+		            	<div>
+		            		<span style={{whiteSpace: 'nowrap'}} id="ZeroSpan" />
+		            	</div>
+		            	<br/>
+		            	Critical Numbers: 
+		            	<br/>
+		            	<div>
+		            		<span style={{whiteSpace: 'nowrap'}} id="CritSpan" />
+		            	</div>
 		            </div>
 	        	</SplitterLayout>
 	        </div>
