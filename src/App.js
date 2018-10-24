@@ -1,21 +1,26 @@
 import React from "react";
-import SplitterLayout from "react-splitter-layout"
-import Button from "@material-ui/core/Button"
-import TextField from "@material-ui/core/TextField"
-import Checkbox from "@material-ui/core/Checkbox"
+import SplitterLayout from "react-splitter-layout";
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Checkbox from "@material-ui/core/Checkbox";
 
 import Graph from "./Graph.js";
-import MathInput from "./MathInput.js"
+import XY from "./XY.js";
+import XYTable from "./XYTable.js";
+// import EnhancedTable from "./EnhancedTable.js"; 
+import MathInput from "./MathInput.js";
 
 export default class App extends React.Component {
 	constructor(props){
 		super(props);
 		this.graph;
+		this.xy;
 		this.styles = {
 			textBoxSize: {
 				fontSize: 50
 			}
 		};
+
 		this.points;
 	}
 	refresh(e){
@@ -118,6 +123,8 @@ export default class App extends React.Component {
 		            	<div>
 		            		<span style={{whiteSpace: 'nowrap'}} id="CritSpan" />
 		            	</div>
+		            	<XY id="xy" ref={(_xy)=>{ this.xy = _xy; }}/>
+						<XYTable></XYTable>
 		            </div>
 	        	</SplitterLayout>
 	        </div>

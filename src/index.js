@@ -11,7 +11,7 @@ document.getElementsByTagName("body")[0].style.overflow = "hidden";
 
 let app = ReactDOM.render(<App />, document.getElementById("app"));
 
-app.graph.set_dPixel(1);
+app.graph.set_dPixel(2);
 
 app.refresh = function(e) {
 	try{
@@ -28,8 +28,9 @@ app.refresh = function(e) {
 			inv: app.graph._fzeros()
 		};
 		app.setValues(points);
+		// app.xy.refresh(points);
 	} catch(err){
-
+		console.log(err);
 	}
 }
 

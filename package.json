@@ -35,7 +35,13 @@
     "webpack-dev-server": "^3.1.5"
   },
   "dependencies": {
+    "@devexpress/dx-react-core": "^1.8.0",
+    "@devexpress/dx-react-grid": "^1.8.0",
+    "@devexpress/dx-react-grid-material-ui": "^1.8.0",
     "@material-ui/core": "^1.5.1",
+    "@material-ui/icons": "^3.0.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "classnames": "^2.2.6",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^2.0.0",
     "jquery": "^3.3.1",
