@@ -11,24 +11,17 @@ document.getElementsByTagName("body")[0].style.overflow = "hidden";
 
 let app = ReactDOM.render(<App />, document.getElementById("app"));
 
-app.graph.set_dPixel(2);
+app.graph.set_dPixel(1);
 
 app.refresh = function(e) {
 	try{
-		app.graph.fullscreen();
 		let values = app.getValues();
 		app.graph.setValues(values);
 		app.graph.graph(values.function);
 		console.log("Zeros: " + app.graph.fzeros());
 		console.log("Crit#: " + app.graph.f_zeros());
 		console.log("Inv  : " + app.graph._fzeros());
-		let points = {
-			zeros: app.graph.fzeros(),
-			crit: app.graph.f_zeros(),
-			inv: app.graph._fzeros()
-		};
-		app.setValues(points);
-		// app.xy.refresh(points);
+		app.xy.refresh(app.graph.points());
 	} catch(err){
 		console.log(err);
 	}

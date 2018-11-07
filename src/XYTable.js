@@ -5,6 +5,8 @@ import {
     PagingState,
     IntegratedPaging,
     IntegratedSelection,
+    SortingState,
+    IntegratedSorting,
 } from '@devexpress/dx-react-grid';
 import {
     Grid,
@@ -24,9 +26,7 @@ export default class XYTable extends React.Component {
                 { name: 'y', title: 'y' },
                 { name: 'type', title: 'Type' }
             ],
-            rows: [
-                { x: '1', y: '1', type: 'rel' }
-            ],
+            rows: [],
             selection: [],
         };
 
@@ -50,15 +50,40 @@ export default class XYTable extends React.Component {
                             selection={selection}
                             onSelectionChange={this.changeSelection}
                         />
+                        <SortingState defaultSorting={[{ columnName: "x", direction: "asc" }]} />
+                        <IntegratedSorting />
                         <IntegratedPaging />
                         <IntegratedSelection />
                         <Table />
-                        <TableHeaderRow />
+                        <TableHeaderRow showSortingControls/>
                         <TableSelection showSelectAll />
                         <PagingPanel />
                     </Grid>
                 </Paper>
             </div>
         );
+    }
+
+    refresh(_){
+        // this.state.rows = [
+        //     { x: '1', y: '1', type: 'rel' },
+        //     { x: '4', y: '2', type: 'rel' },
+        //     { x: '5', y: '3', type: 'rel' },
+        //     { x: '5', y: '3', type: 'rel' },
+        //     { x: '5', y: '3', type: 'rel' },
+        //     { x: '5', y: '3', type: 'rel' },
+        //     { x: '6', y: '4', type: 'inf' },
+        //     { x: '2', y: '5', type: 'inf' },
+        //     { x: '6', y: '4', type: 'inf' },
+        //     { x: '2', y: '5', type: 'inf' },
+        //     { x: '6', y: '4', type: 'inf' },
+        //     { x: '2', y: '5', type: 'inf' },
+        //     { x: '6', y: '4', type: 'inf' },
+        //     { x: '2', y: '5', type: 'inf' },
+        //     { x: '3', y: '7', type: 'hole' }
+        // ];
+
+        this.state.rows = _;
+        this.forceUpdate();
     }
 }

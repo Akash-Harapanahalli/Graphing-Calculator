@@ -7,7 +7,6 @@ import Checkbox from "@material-ui/core/Checkbox";
 import Graph from "./Graph.js";
 import XY from "./XY.js";
 import XYTable from "./XYTable.js";
-// import EnhancedTable from "./EnhancedTable.js"; 
 import MathInput from "./MathInput.js";
 
 export default class App extends React.Component {
@@ -37,10 +36,6 @@ export default class App extends React.Component {
 			f__: document.getElementById("f''(x)").checked
 		}
 	}
-	setValues(_){
-		document.getElementById("ZeroSpan").textContent = "x = " + _.zeros;
-		document.getElementById("CritSpan").textContent = "x = " + _.crit;
-	} 
 	render() {
 	    return (
 	        <div> 
@@ -111,20 +106,7 @@ export default class App extends React.Component {
 			        	<div>
 			            	<Button style={{width: '100%', height: '100px'}} variant="contained" color="secondary" onClick={() => { this.refresh(); }}>Graph</Button>
 			            </div>
-			            <br/>
-		            	Zeros: 
-		            	<br/>
-		            	<div>
-		            		<span style={{whiteSpace: 'nowrap'}} id="ZeroSpan" />
-		            	</div>
-		            	<br/>
-		            	Critical Numbers: 
-		            	<br/>
-		            	<div>
-		            		<span style={{whiteSpace: 'nowrap'}} id="CritSpan" />
-		            	</div>
-		            	<XY id="xy" ref={(_xy)=>{ this.xy = _xy; }}/>
-						<XYTable></XYTable>
+						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }}></XYTable>
 		            </div>
 	        	</SplitterLayout>
 	        </div>

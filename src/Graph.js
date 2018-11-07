@@ -27,6 +27,7 @@ export default class Graph extends React.Component {
 	        f_: true,
 	        f__: true
 		};
+		this.cache = {};
 		// this.finds = {
 		// 	x: this.general.x.min,
 	 //        y: 0,
@@ -60,6 +61,7 @@ export default class Graph extends React.Component {
 	}
 	graph(_f){
 		this.f = _f;
+		this.fullscreen();
 		try {
 			this.recalculate();
 			this.axes();
@@ -81,6 +83,16 @@ export default class Graph extends React.Component {
 		this.ctx.beginPath();
 		this.ctx.strokeStyle = _.strokeStyle;
 		this.ctx.lineWidth = _.strokeWidth;
+		this.ctx.setLineDash([0]);
+		this.ctx.moveTo(_.x1, _.y1);
+		this.ctx.lineTo(_.x2, _.y2);
+		this.ctx.stroke();
+	}
+	drawDotted(_){
+		this.ctx.beginPath();
+		this.ctx.strokeStyle = _.strokeStyle;
+		this.ctx.lineWidth = _.strokeWidth;
+		this.ctx.setLineDash([6]);
 		this.ctx.moveTo(_.x1, _.y1);
 		this.ctx.lineTo(_.x2, _.y2);
 		this.ctx.stroke();
@@ -259,34 +271,70 @@ export default class Graph extends React.Component {
         });
 	}
 	plot(){
+		let func = this.f;
+		this.cache.func = {};
 		while(this.x < this.general.x.max){
-            this.y = math.eval(this.f,{"x": this.x});
+			if(!this.isEmpty(this.cache.func.x)){
+            	this.y = this.cache.func.x;
+            	console.log("used cache");
+        	} else {
+        		this.y = math.eval(this.f,{"x": this.x});
+        		this.cache.func.x = this.y;
+        		console.log("calculated");
+        	}
             this.dy = this.y - this.prev_y;
             this.d2y = this.dy - this.prev_dy;
 
-            this.drawLine({
-                strokeStyle: "#0000ff",
-                strokeWidth: 3,
-                x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_y * -this.inv_dy + this.general.y.origin)),
-                x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.y * -this.inv_dy + this.general.y.origin))
-            });
+			if((this.prev_y > this.y && this.prev_y > this.general.y.max && this.y < this.general.y.min) || (this.prev_y < this.y && this.prev_y < this.general.y.min && this.y > this.general.y.max)){
+				this.drawDotted({
+					strokeStyle: "#0000ff",
+					strokeWidth: 3,
+					x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_y * -this.inv_dy + this.general.y.origin)),
+					x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.y * -this.inv_dy + this.general.y.origin))
+				});
+			} else {
+				this.drawLine({
+					strokeStyle: "#0000ff",
+					strokeWidth: 3,
+					x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_y * -this.inv_dy + this.general.y.origin)),
+					x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.y * -this.inv_dy + this.general.y.origin))
+				});
+			}
 
             if(this.general.f_){
-                this.drawLine({
-                    strokeStyle: "#ff0000",
-                    strokeWidth: 3,
-                    x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_dy/this.dx) * -this.inv_dy + this.general.y.origin),
-                    x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.dy/this.dx) * -this.inv_dy + this.general.y.origin)
-                });
+				if((this.prev_dy > this.dy && this.prev_dy > this.general.y.max && this.dy < this.general.y.min) || (this.prev_dy < this.dy && this.prev_dy < this.general.y.min && this.dy > this.general.y.max)){
+					this.drawDotted({
+						strokeStyle: "#ff0000",
+						strokeWidth: 3,
+						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_dy/this.dx) * -this.inv_dy + this.general.y.origin),
+						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.dy/this.dx) * -this.inv_dy + this.general.y.origin)
+					});
+				} else {
+					this.drawLine({
+						strokeStyle: "#ff0000",
+						strokeWidth: 3,
+						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_dy/this.dx) * -this.inv_dy + this.general.y.origin),
+						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.dy/this.dx) * -this.inv_dy + this.general.y.origin)
+					});
+				}
             }
 
             if(this.general.f__){
-                this.drawLine({
-                    strokeStyle: "#00ff00",
-                    strokeWidth: 3,
-                    x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin),
-                    x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin)
-                });
+				if((this.prev_d2y > this.d2y && this.prev_d2y > this.general.y.max && this.d2y < this.general.y.min) || (this.prev_d2y < this.d2y && this.prev_d2y < this.general.y.min && this.d2y > this.general.y.max)){
+					this.drawDotted({
+						strokeStyle: "#00ff00",
+						strokeWidth: 3,
+						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin),
+						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin)
+					});
+				} else {
+					this.drawLine({
+						strokeStyle: "#00ff00",
+						strokeWidth: 3,
+						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin),
+						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin)
+					});
+				}
             }
 
             this.prev_x = this.x;
@@ -295,6 +343,14 @@ export default class Graph extends React.Component {
             this.prev_d2y = this.d2y;
             this.x += this.dx;
         }
+        console.log(this.cache);
+	}
+	isEmpty(obj) {
+	    for(var key in obj) {
+	        if(obj.hasOwnProperty(key))
+	            return false;
+	    }
+	    return true;
 	}
 	fullscreen(){
 		this.resize((this.container.offsetWidth - 5),
@@ -310,6 +366,49 @@ export default class Graph extends React.Component {
 	}
 	_fzeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this._f);
+	}
+	points(){
+		let points = {
+			zeros: this.fzeros(),
+			crit: this.f_zeros(),
+			inv: this._fzeros()
+		};
+
+		let r = [], index = 0;
+		for(let i = 0; i < points.zeros.length; i++){
+			let a = {};
+			a.x = points.zeros[i];
+			a.y = 0;
+			a.type = "Zero";
+			r[index] = a;
+			index++;
+		}
+
+		for(let i = 0; i < points.crit.length; i++){
+			let a = {};
+			a.x = points.crit[i];
+			a.y = math.eval(this.f, {x: a.x});
+			a.type = "Critical Number";
+			r[index] = a;
+			index++;
+		}
+		for(let i = 0; i < points.inv.length; i++){
+			let a = {};
+			a.x = points.inv[i];
+			a.y = math.eval(this.f, {x: a.x});
+			if(isNaN(a.y)){
+				a.type = "Hole";
+				a.y = math.eval(this.f, {x: a.x - this.dx});
+			} else {
+				a.type = "Asymtote";
+				a.y = undefined;
+			}
+			r[index] = a;
+			index++;
+		}
+
+		console.log(r);
+		return r;
 	}
 	mousemove(e){
 		// TO BE OVERRIDDEN

@@ -1,7 +1,7 @@
 import math from "mathjs";
 
 const brent = (lower,upper,intervals,f) => {
-	let epsilon = 0.000000001;  // When abs(b - a) is less than this number, they have converged enough to call b the zero.
+	let epsilon = 0.000000000001;  // When abs(b - a) is less than this number, they have converged enough to call b the zero.
 	const brent_alg = (a,b) => {  // This is the actual algorithm. This function will be called multiple times later.
 		let count = 0;
 		let f_a = math.eval(f, {x: a});
