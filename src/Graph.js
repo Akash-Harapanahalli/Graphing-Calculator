@@ -10,6 +10,7 @@ export default class Graph extends React.Component {
 		this.ctx;
 		this.container;
 		this.mousemove;
+		this.progress;
 		this.general = {
 			x: {
 	            min: -10,
@@ -60,13 +61,18 @@ export default class Graph extends React.Component {
 		this.container = document.getElementById(this.props.container);
 	}
 	graph(_f){
+		this.progress.setProgress(0);
 		this.f = _f;
 		this.fullscreen();
 		try {
 			this.recalculate();
+			this.progress.setProgress(10);
 			this.axes();
+			this.progress.setProgress(20);
 			this.plot();
+			this.progress.setProgress(80);
 			this.border();
+			this.progress.setProgress(100);
 		} catch (err){
 			console.log(err);
 			this.axes();
@@ -74,6 +80,10 @@ export default class Graph extends React.Component {
 		}
 		this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
 		this._f = "1 / (" + this.f + ")";
+
+		let temp = this.points();
+	
+		return this.points();
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -271,17 +281,26 @@ export default class Graph extends React.Component {
         });
 	}
 	plot(){
-		let func = this.f;
-		this.cache.func = {};
+		if(this.isEmpty(this.cache[this.f])){
+			this.cache[this.f] = {
+				meme: 0
+			};
+			console.log("remade");
+		}
 		while(this.x < this.general.x.max){
-			if(!this.isEmpty(this.cache.func.x)){
-            	this.y = this.cache.func.x;
-            	console.log("used cache");
+			if(this.cache[this.f][this.x] != undefined || this.cache[this.f][this.x]){
+            	this.y = this.cache[this.f][this.x];
+            	// console.log("used cache");
         	} else {
         		this.y = math.eval(this.f,{"x": this.x});
-        		this.cache.func.x = this.y;
-        		console.log("calculated");
-        	}
+        		this.cache[this.f][this.x] = this.y;
+        		// console.log("calculated");
+			}
+			this.y = math.eval(this.f,{"x": this.x});
+			// console.log(this.y);
+			if(this.y == undefined || !this.y || isNaN(this.y)){
+				this.y = this.general.x.min - 10;
+			}
             this.dy = this.y - this.prev_y;
             this.d2y = this.dy - this.prev_dy;
 
@@ -343,7 +362,7 @@ export default class Graph extends React.Component {
             this.prev_d2y = this.d2y;
             this.x += this.dx;
         }
-        console.log(this.cache);
+        // console.log(this.cache);
 	}
 	isEmpty(obj) {
 	    for(var key in obj) {
@@ -373,13 +392,15 @@ export default class Graph extends React.Component {
 			crit: this.f_zeros(),
 			inv: this._fzeros()
 		};
+		console.log(points);
 
 		let r = [], index = 0;
 		for(let i = 0; i < points.zeros.length; i++){
 			let a = {};
 			a.x = points.zeros[i];
-			a.y = 0;
+			a.y = math.eval(this.f, {x: a.x});
 			a.type = "Zero";
+			// if(Math.abs(a.y) )
 			r[index] = a;
 			index++;
 		}
@@ -389,8 +410,10 @@ export default class Graph extends React.Component {
 			a.x = points.crit[i];
 			a.y = math.eval(this.f, {x: a.x});
 			a.type = "Critical Number";
-			r[index] = a;
-			index++;
+			if(typeof a.y === 'object'){
+				r[index] = a;
+				index++;
+			}
 		}
 		for(let i = 0; i < points.inv.length; i++){
 			let a = {};

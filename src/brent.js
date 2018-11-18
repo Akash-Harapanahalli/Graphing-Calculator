@@ -62,7 +62,7 @@ const brent = (lower,upper,intervals,f) => {
 
 	for(let i = 0; i < intervals; i++){
 		let meme = brent_alg( lower + (numbersPerInterval * i) , lower + (numbersPerInterval * (i + 1)) );
-		if(!(isNaN(meme) || meme == undefined || Math.abs(math.eval(f, {x: meme})) > 0.00001 || (Math.abs(meme - roots[rootsIndex - 1]) < epsilon))){
+		if(!(typeof meme === 'object') || !(isNaN(meme) || meme == undefined || Math.abs(math.eval(f, {x: meme})) > 0.00001 || (Math.abs(meme - roots[rootsIndex - 1]) < epsilon))){
 			roots[rootsIndex] = meme;
 			rootsIndex++;
 		}

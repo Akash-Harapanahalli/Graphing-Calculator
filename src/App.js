@@ -5,6 +5,7 @@ import TextField from "@material-ui/core/TextField";
 import Checkbox from "@material-ui/core/Checkbox";
 
 import Graph from "./Graph.js";
+import ProgressBar from "./ProgressBar.js"
 import XY from "./XY.js";
 import XYTable from "./XYTable.js";
 import MathInput from "./MathInput.js";
@@ -13,6 +14,7 @@ export default class App extends React.Component {
 	constructor(props){
 		super(props);
 		this.graph;
+		this.progress;
 		this.xy;
 		this.styles = {
 			textBoxSize: {
@@ -39,6 +41,7 @@ export default class App extends React.Component {
 	render() {
 	    return (
 	        <div> 
+	        	<ProgressBar ref={(_progress) => { this.progress = _progress; }}/>
 	        	<SplitterLayout primaryIndex={0} percentage primaryMinSize={60} onDragEnd={() => { this.refresh(); }}>
 		            <div>
 			            <div id="graphDIV">

@@ -13,15 +13,13 @@ let app = ReactDOM.render(<App />, document.getElementById("app"));
 
 app.graph.set_dPixel(1);
 
+app.graph.progress = app.progress;
+
 app.refresh = function(e) {
 	try{
 		let values = app.getValues();
 		app.graph.setValues(values);
-		app.graph.graph(values.function);
-		console.log("Zeros: " + app.graph.fzeros());
-		console.log("Crit#: " + app.graph.f_zeros());
-		console.log("Inv  : " + app.graph._fzeros());
-		app.xy.refresh(app.graph.points());
+		app.xy.refresh(app.graph.graph(values.function));
 	} catch(err){
 		console.log(err);
 	}
