@@ -43,6 +43,8 @@ export default class Graph extends React.Component {
 
 		this.f_;
 
+		this.values;
+		this.p;
 		// this.f_ = function(_){
 		// 	(math.eval(f, {x: (_ + this.dx)}) - math.eval(f, {x: (_ + this.dx)})) / this.dx;
 		// }
@@ -64,26 +66,30 @@ export default class Graph extends React.Component {
 		this.progress.setProgress(0);
 		this.f = _f;
 		this.fullscreen();
+		let temp;
 		try {
 			this.recalculate();
 			this.progress.setProgress(10);
 			this.axes();
 			this.progress.setProgress(20);
 			this.plot();
-			this.progress.setProgress(80);
-			this.border();
-			this.progress.setProgress(100);
+			this.progress.setProgress(60);
+
 		} catch (err){
 			console.log(err);
 			this.axes();
 			this.border();
 		}
-		this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
-		this._f = "1 / (" + this.f + ")";
-
-		let temp = this.points();
+			this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
+			this._f = "1 / (" + this.f + ")";
+			temp = this.points();
+			
+			this.label();
+			this.progress.setProgress(80);
+			this.border();
+			this.progress.setProgress(100);
 	
-		return this.points();
+		return temp;
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -290,7 +296,6 @@ export default class Graph extends React.Component {
 		while(this.x < this.general.x.max){
 			if(this.cache[this.f][this.x] != undefined || this.cache[this.f][this.x]){
             	this.y = this.cache[this.f][this.x];
-            	// console.log("used cache");
         	} else {
         		this.y = math.eval(this.f,{"x": this.x});
         		this.cache[this.f][this.x] = this.y;
@@ -387,37 +392,37 @@ export default class Graph extends React.Component {
 		return brent(this.general.x.min, this.general.x.max, 100, this._f);
 	}
 	points(){
-		let points = {
+		this.values = {
 			zeros: this.fzeros(),
 			crit: this.f_zeros(),
 			inv: this._fzeros()
 		};
-		console.log(points);
+		console.log("Points: " + this.values);
 
 		let r = [], index = 0;
-		for(let i = 0; i < points.zeros.length; i++){
+		for(let i = 0; i < this.values.zeros.length; i++){
 			let a = {};
-			a.x = points.zeros[i];
-			a.y = math.eval(this.f, {x: a.x});
+			a.x = this.values.zeros[i];
+			a.y = 0;
 			a.type = "Zero";
-			// if(Math.abs(a.y) )
-			r[index] = a;
-			index++;
-		}
-
-		for(let i = 0; i < points.crit.length; i++){
-			let a = {};
-			a.x = points.crit[i];
-			a.y = math.eval(this.f, {x: a.x});
-			a.type = "Critical Number";
-			if(typeof a.y === 'object'){
+			let tmp = math.eval(this.f, {x: a.x});
+			if(tmp > 0.000001 || tmp < 0.000001){
 				r[index] = a;
 				index++;
 			}
 		}
-		for(let i = 0; i < points.inv.length; i++){
+
+		for(let i = 0; i < this.values.crit.length; i++){
 			let a = {};
-			a.x = points.inv[i];
+			a.x = this.values.crit[i];
+			a.y = math.eval(this.f, {x: a.x});
+			a.type = "Critical Number";
+			r[index] = a;
+			index++;
+		}
+		for(let i = 0; i < this.values.inv.length; i++){
+			let a = {};
+			a.x = this.values.inv[i];
 			a.y = math.eval(this.f, {x: a.x});
 			if(isNaN(a.y)){
 				a.type = "Hole";
@@ -430,8 +435,25 @@ export default class Graph extends React.Component {
 			index++;
 		}
 
-		console.log(r);
+		this.p = r;
+
 		return r;
+	}
+	label(){
+		for(let i = 0; i < this.p.length; i++){
+			if(this.p[i].type == "Asymtote"){
+				this.drawDotted({
+					strokeStyle: "#ff0000",
+					strokeWidth: 3,
+					x1: this.p[i].x, y1: this.canvas.height,
+					x2: this.p[i].x, y2: 0
+				});
+				console.log("Graphed asymtote");
+				console.log("x: " + this.p[i].x)
+			} else if(this.p[i].type == "Hole"){
+
+			}
+		}
 	}
 	mousemove(e){
 		// TO BE OVERRIDDEN

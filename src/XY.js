@@ -23,21 +23,6 @@ export default class XY extends React.Component {
 	}
 
 	refresh(_){
-		
-		// this.memes = (
-		// 	<Table>
-		// 		<TableRow>
-		// 			<TableCell>Good.</TableCell>
-		// 			<TableCell>f(x)</TableCell>
-		// 			<TableCell>Type</TableCell>
-		// 		</TableRow>
-		// 		<TableRow>
-		// 			<TableCell>x</TableCell>
-		// 			<TableCell>f(x)</TableCell>
-		// 			<TableCell>Type</TableCell>
-		// 		</TableRow>
-		// 	</Table>
-		// );
 		let tablerows = [];
 
 
@@ -53,14 +38,7 @@ export default class XY extends React.Component {
 								<TableCell>Type</TableCell>
 							</TableRow>);
 		}
-		// tablerows.push(<TableRow key="row2">
-		// 					<TableCell>Easy.</TableCell>
-		// 					<TableCell>f(x)</TableCell>
-		// 					<TableCell>Type</TableCell>
-		// 				</TableRow>);
-
 		this.memes = <Table> {tablerows} </Table>;
-		// this.render();
 		this.forceUpdate();
 	}
 }
