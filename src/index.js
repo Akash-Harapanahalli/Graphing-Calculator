@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import App from "./App.js";
+import math from "mathjs";
 
 document.getElementsByTagName("body")[0].style.overflow = "hidden";
 
@@ -14,7 +15,11 @@ app.refresh = function(e) {
 	try{
 		let values = app.getValues();
 		app.graph.setValues(values);
-		app.xy.refresh(app.graph.graph(values.function));
+		app.graph.graph(values.function);
+		setTimeout(() => {
+			app.xy.refresh(app.graph.delayed());
+		}, 1000);
+		console.log(app.xy.state);
 	} catch(err){
 		console.log(err);
 	}

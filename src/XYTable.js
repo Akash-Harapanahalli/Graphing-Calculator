@@ -65,24 +65,6 @@ export default class XYTable extends React.Component {
     }
 
     refresh(_){
-        // this.state.rows = [
-        //     { x: '1', y: '1', type: 'rel' },
-        //     { x: '4', y: '2', type: 'rel' },
-        //     { x: '5', y: '3', type: 'rel' },
-        //     { x: '5', y: '3', type: 'rel' },
-        //     { x: '5', y: '3', type: 'rel' },
-        //     { x: '5', y: '3', type: 'rel' },
-        //     { x: '6', y: '4', type: 'inf' },
-        //     { x: '2', y: '5', type: 'inf' },
-        //     { x: '6', y: '4', type: 'inf' },
-        //     { x: '2', y: '5', type: 'inf' },
-        //     { x: '6', y: '4', type: 'inf' },
-        //     { x: '2', y: '5', type: 'inf' },
-        //     { x: '6', y: '4', type: 'inf' },
-        //     { x: '2', y: '5', type: 'inf' },
-        //     { x: '3', y: '7', type: 'hole' }
-        // ];
-
         this.state.rows = _;
         this.forceUpdate();
     }

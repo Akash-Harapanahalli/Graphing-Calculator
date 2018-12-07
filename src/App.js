@@ -6,7 +6,6 @@ import Checkbox from "@material-ui/core/Checkbox";
 
 import Graph from "./Graph.js";
 import ProgressBar from "./ProgressBar.js"
-import XY from "./XY.js";
 import XYTable from "./XYTable.js";
 import MathInput from "./MathInput.js";
 
@@ -30,6 +29,7 @@ export default class App extends React.Component {
 	getValues(){
 		return {
 			function: document.getElementById("function").value,
+			dPixel: document.getElementById("dPixel").value,
 			xMin: document.getElementById("xMin").value,
 			xMax: document.getElementById("xMax").value,
 			yMin: document.getElementById("yMin").value,
@@ -50,14 +50,22 @@ export default class App extends React.Component {
 		        	</div>
 		        	<div>
 		        		<span>
-		        			f(x)=
+							f(x)=
 				        	<TextField 
 				        		style={{width: '80%'}} 
 				        		id="function" 
-				        		defaultValue="sin(x)" 
+				        		defaultValue="sin(x)/x" 
 				        		onChange={() => { this.refresh(); }}
 				        	/>
 			        	</span>
+						<br/>
+						dPixel=
+						<TextField 
+							style={{width: '5%'}} 
+							id="dPixel" 
+							defaultValue="1" 
+							onChange={() => { this.refresh(); }}
+						/>
 			        	<br/>
 			        	f'(x)
 			        	<Checkbox

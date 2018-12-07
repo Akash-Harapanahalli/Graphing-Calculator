@@ -42,6 +42,7 @@ export default class Graph extends React.Component {
 		this.inv_dx, this.inv_dy, this.x, this.prev_x, this.y, this.prev_y;
 
 		this.f_;
+		this.temp;
 
 		this.values;
 		this.p;
@@ -66,30 +67,38 @@ export default class Graph extends React.Component {
 		this.progress.setProgress(0);
 		this.f = _f;
 		this.fullscreen();
-		let temp;
 		try {
 			this.recalculate();
 			this.progress.setProgress(10);
-			this.axes();
-			this.progress.setProgress(20);
 			this.plot();
-			this.progress.setProgress(60);
+			this.progress.setProgress(50);
+			// console.log("graphed");
 
 		} catch (err){
 			console.log(err);
 			this.axes();
 			this.border();
 		}
-			this.f_ = "(" + (this.f).replace("x", ("(x + " + this.dx + ")")) + " - " + (this.f) + ") / " + (this.dx);
-			this._f = "1 / (" + this.f + ")";
-			temp = this.points();
-			
-			this.label();
-			this.progress.setProgress(80);
-			this.border();
-			this.progress.setProgress(100);
-	
-		return temp;
+		this.axes();
+		this.progress.setProgress(55);
+		this.border();
+		this.progress.setProgress(60);
+
+		console.log("boutta halt");
+	}
+	delayed(){
+		this.f_ = "((" + (this.f).replace(/x/g, ("(x + " + 0.00000001 + ")")) + ") - (" + (this.f) + ")) / " + 0.00000001;
+		this._f = "1 / (" + this.f + ")";
+		this.temp = this.points();
+		
+		this.label();
+		this.progress.setProgress(80);
+		this.axes();
+		this.progress.setProgress(90);
+		this.border();
+		this.progress.setProgress(100);
+
+		return this.temp;
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -113,6 +122,17 @@ export default class Graph extends React.Component {
 		this.ctx.lineTo(_.x2, _.y2);
 		this.ctx.stroke();
 	}
+	drawCircle(_){
+		this.ctx.beginPath();
+		this.ctx.strokeStyle = _.strokeStyle;
+		this.ctx.lineWidth = _.strokeWidth;
+		this.ctx.arc(_.x, _.y, _.radius, 0, 2 * Math.PI);
+
+		this.ctx.fillStyle = _.fillStyle;
+
+		this.ctx.fill();
+		this.ctx.stroke();
+	}
 	color(_color){
 		this.ctx.fillStyle = _color;
 		this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -121,10 +141,11 @@ export default class Graph extends React.Component {
 		this.dPixel = _;
 	}
 	setValues(_){
-		this.general.x.min = math.eval(_.xMin);
-		this.general.x.max = math.eval(_.xMax);
-		this.general.y.min = math.eval(_.yMin);
-		this.general.y.max = math.eval(_.yMax);
+		this.dPixel = math.eval("0 + " + _.dPixel);
+		this.general.x.min = math.eval("0 + " + _.xMin);
+		this.general.x.max = math.eval("0 + " + _.xMax);
+		this.general.y.min = math.eval("0 + " + _.yMin);
+		this.general.y.max = math.eval("0 + " + _.yMax);
 		this.general.f_ = _.f_;
 		this.general.f__ = _.f__;
 	}
@@ -139,7 +160,8 @@ export default class Graph extends React.Component {
 		this.general.x.origin = ((0 - this.general.x.min) / (this.general.x.max - this.general.x.min)) * this.general.x.pixelCount;
         this.general.y.origin = ((this.general.y.max) / (this.general.y.max - this.general.y.min)) * (this.general.y.pixelCount);
 
-        this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
+		this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
+		// console.log("dx = " + this.dx);
         this.dy = (this.dPixel * (this.general.y.max - this.general.y.min)) / this.general.y.pixelCount;
         this.prev_dy = this.dy;
 
@@ -291,7 +313,7 @@ export default class Graph extends React.Component {
 			this.cache[this.f] = {
 				meme: 0
 			};
-			console.log("remade");
+			// console.log("remade");
 		}
 		while(this.x < this.general.x.max){
 			if(this.cache[this.f][this.x] != undefined || this.cache[this.f][this.x]){
@@ -310,12 +332,6 @@ export default class Graph extends React.Component {
             this.d2y = this.dy - this.prev_dy;
 
 			if((this.prev_y > this.y && this.prev_y > this.general.y.max && this.y < this.general.y.min) || (this.prev_y < this.y && this.prev_y < this.general.y.min && this.y > this.general.y.max)){
-				this.drawDotted({
-					strokeStyle: "#0000ff",
-					strokeWidth: 3,
-					x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_y * -this.inv_dy + this.general.y.origin)),
-					x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.y * -this.inv_dy + this.general.y.origin))
-				});
 			} else {
 				this.drawLine({
 					strokeStyle: "#0000ff",
@@ -325,14 +341,8 @@ export default class Graph extends React.Component {
 				});
 			}
 
-            if(this.general.f_){
+            if(this.general.f_ && this.y != undefined && typeof this.y !== "object"){
 				if((this.prev_dy > this.dy && this.prev_dy > this.general.y.max && this.dy < this.general.y.min) || (this.prev_dy < this.dy && this.prev_dy < this.general.y.min && this.dy > this.general.y.max)){
-					this.drawDotted({
-						strokeStyle: "#ff0000",
-						strokeWidth: 3,
-						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_dy/this.dx) * -this.inv_dy + this.general.y.origin),
-						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.dy/this.dx) * -this.inv_dy + this.general.y.origin)
-					});
 				} else {
 					this.drawLine({
 						strokeStyle: "#ff0000",
@@ -345,12 +355,6 @@ export default class Graph extends React.Component {
 
             if(this.general.f__){
 				if((this.prev_d2y > this.d2y && this.prev_d2y > this.general.y.max && this.d2y < this.general.y.min) || (this.prev_d2y < this.d2y && this.prev_d2y < this.general.y.min && this.d2y > this.general.y.max)){
-					this.drawDotted({
-						strokeStyle: "#00ff00",
-						strokeWidth: 3,
-						x1: (this.prev_x * this.inv_dx + this.general.x.origin), y1: ((this.prev_d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin),
-						x2: (this.x * this.inv_dx + this.general.x.origin), y2: ((this.d2y/(this.dx * this.dx)) * -this.inv_dy + this.general.y.origin)
-					});
 				} else {
 					this.drawLine({
 						strokeStyle: "#00ff00",
@@ -386,24 +390,25 @@ export default class Graph extends React.Component {
 		return brent(this.general.x.min, this.general.x.max, 100, this.f);
 	}
 	f_zeros(){
-		return brent(this.general.x.min, this.general.x.max, 100, this.f_);
+		return brent(this.general.x.min, this.general.x.max, 500, this.f_);
 	}
 	_fzeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this._f);
 	}
 	points(){
+		// console.log("Points Coming up");
 		this.values = {
 			zeros: this.fzeros(),
 			crit: this.f_zeros(),
 			inv: this._fzeros()
 		};
-		console.log("Points: " + this.values);
+		// console.log(this.values);
 
 		let r = [], index = 0;
 		for(let i = 0; i < this.values.zeros.length; i++){
 			let a = {};
 			a.x = this.values.zeros[i];
-			a.y = 0;
+			a.y = "0";
 			a.type = "Zero";
 			let tmp = math.eval(this.f, {x: a.x});
 			if(tmp > 0.000001 || tmp < 0.000001){
@@ -415,10 +420,13 @@ export default class Graph extends React.Component {
 		for(let i = 0; i < this.values.crit.length; i++){
 			let a = {};
 			a.x = this.values.crit[i];
-			a.y = math.eval(this.f, {x: a.x});
-			a.type = "Critical Number";
-			r[index] = a;
-			index++;
+			a.y = (math.eval(this.f, {x: a.x}));
+			if(!isNaN(a.y)){
+				a.y = (a.y).toString();
+				a.type = "Critical Number";
+				r[index] = a;
+				index++;
+			}
 		}
 		for(let i = 0; i < this.values.inv.length; i++){
 			let a = {};
@@ -426,7 +434,7 @@ export default class Graph extends React.Component {
 			a.y = math.eval(this.f, {x: a.x});
 			if(isNaN(a.y)){
 				a.type = "Hole";
-				a.y = math.eval(this.f, {x: a.x - this.dx});
+				a.y = (math.eval(this.f, {x: a.x - this.dx})).toString();
 			} else {
 				a.type = "Asymtote";
 				a.y = undefined;
@@ -443,15 +451,27 @@ export default class Graph extends React.Component {
 		for(let i = 0; i < this.p.length; i++){
 			if(this.p[i].type == "Asymtote"){
 				this.drawDotted({
-					strokeStyle: "#ff0000",
+					strokeStyle: "#0000ff",
 					strokeWidth: 3,
-					x1: this.p[i].x, y1: this.canvas.height,
-					x2: this.p[i].x, y2: 0
+					x1: this.p[i].x * this.inv_dx + this.general.x.origin, y1: this.canvas.height,
+					x2: this.p[i].x * this.inv_dx + this.general.x.origin, y2: 0
 				});
-				console.log("Graphed asymtote");
-				console.log("x: " + this.p[i].x)
+				// console.log("Graphed asymtote");
+				// console.log("x: " + this.p[i].x)
 			} else if(this.p[i].type == "Hole"){
-
+				this.drawCircle({
+					strokeStyle: "#0000ff",
+					fillStyle: "#ffffff",
+					strokeWidth: 2,
+					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 8
+				});
+			} else if(this.p[i].type == "Critical Number" || this.p[i].type == "Zero"){
+				this.drawCircle({
+					strokeStyle: "#0000ff",
+					fillStyle: "#0000ff",
+					strokeWidth: 2,
+					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 5
+				});
 			}
 		}
 	}
