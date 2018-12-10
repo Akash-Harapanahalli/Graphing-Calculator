@@ -8,6 +8,7 @@ import Graph from "./Graph.js";
 import ProgressBar from "./ProgressBar.js"
 import XYTable from "./XYTable.js";
 import MathInput from "./MathInput.js";
+import color from "@material-ui/core/colors/indigo";
 
 export default class App extends React.Component {
 	constructor(props){
@@ -40,7 +41,7 @@ export default class App extends React.Component {
 	}
 	render() {
 	    return (
-	        <div> 
+	        <div styles={{backgroundColor: "black"}}> 
 	        	<ProgressBar ref={(_progress) => { this.progress = _progress; }}/>
 	        	<SplitterLayout primaryIndex={0} percentage primaryMinSize={60} onDragEnd={() => { this.refresh(); }}>
 		            <div>
@@ -114,10 +115,8 @@ export default class App extends React.Component {
 			        		]
 			        	</span>
 			        	<br/>
-			        	<div>
-			            	<Button style={{width: '100%', height: '100px'}} variant="contained" color="secondary" onClick={() => { this.refresh(); }}>Graph</Button>
-			            </div>
-						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }}></XYTable>
+						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }} onChange={() => this.refresh()}></XYTable>
+						<div></div>
 		            </div>
 	        	</SplitterLayout>
 	        </div>

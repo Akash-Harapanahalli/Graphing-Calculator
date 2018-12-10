@@ -30,7 +30,11 @@ export default class XYTable extends React.Component {
             selection: [],
         };
 
-        this.changeSelection = selection => this.setState({ selection });
+        this.changeSelection = selection => {
+            this.setState({ selection });
+            console.log(selection);
+            props.onChange();
+        }
     }
 
     render() {
@@ -44,7 +48,7 @@ export default class XYTable extends React.Component {
                     >
                         <PagingState
                             defaultCurrentPage={0}
-                            pageSize={6}
+                            pageSize={9}
                         />
                         <SelectionState
                             selection={selection}
@@ -52,8 +56,8 @@ export default class XYTable extends React.Component {
                         />
                         <SortingState defaultSorting={[{ columnName: "x", direction: "asc" }]} />
                         <IntegratedSorting />
-                        <IntegratedPaging />
                         <IntegratedSelection />
+                        <IntegratedPaging />
                         <Table />
                         <TableHeaderRow showSortingControls/>
                         <TableSelection showSelectAll />

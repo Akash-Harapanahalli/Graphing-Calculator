@@ -1,11 +1,15 @@
 import math from "mathjs";
+import Mu from "./Mu.js";
 
 const brent = (lower,upper,intervals,f) => {
+
+	let mu = new Mu();
+
 	let epsilon = 0.0000000000001;  // When abs(b - a) is less than this number, they have converged enough to call b the zero.
 	const brent_alg = (a,b) => {  // This is the actual algorithm. This function will be called multiple times later.
 		let count = 0;
-		let f_a = math.eval(f, {x: a});
-		let f_b = math.eval(f, {x: b});
+		let f_a = mu.evaluate(f, {x: a});
+		let f_b = mu.evaluate(f, {x: b});
 		let s, f_s;
 		let d;
 		if(f_a * f_b > 0) return NaN;  // Interval does not include a zero, IVT does not apply.
@@ -17,9 +21,9 @@ const brent = (lower,upper,intervals,f) => {
 		let c = a, f_c;
 		let mflag = true;
 		while(!(f_b == 0 || (Math.abs(b - a) < epsilon))){
-			f_a = math.eval(f, {x: a});
-			f_b = math.eval(f, {x: b});
-			f_c = math.eval(f, {x: b});
+			f_a = mu.evaluate(f, {x: a});
+			f_b = mu.evaluate(f, {x: b});
+			f_c = mu.evaluate(f, {x: b});
 
 			if(f_a != f_c && f_b != f_c){
 				s = (a * f_b * f_c) / ((f_a - f_b) * (f_a - f_c)) + 
@@ -41,7 +45,7 @@ const brent = (lower,upper,intervals,f) => {
 				mflag = false;
 			}
 
-			f_s = math.eval(f,{x: s});
+			f_s = mu.evaluate(f,{x: s});
 			d = c;
 			c = b;
 
@@ -56,21 +60,34 @@ const brent = (lower,upper,intervals,f) => {
 		return b;
 	}
 
-	let roots = [];
-	let rootsIndex = 0;
-	let numbersPerInterval = (upper - lower) / intervals;
+	let key = "" + f + ", (" + lower + ", " + upper + ") , " + intervals;
+	let cache = JSON.parse(localStorage.getItem("brent"));
 
-
-	for(let i = 0; i < intervals; i++){
-		let meme = brent_alg( lower + (numbersPerInterval * i) , lower + (numbersPerInterval * (i + 1)) );
-		let m = (Math.abs(meme - roots[rootsIndex]));
-		let e = math.eval(f, {x: meme});
-		if(!(typeof meme === 'object') && !isNaN(meme) && !(meme == undefined) && (Math.abs(e) < 0.00001 || isNaN(e)) && (isNaN(m) || (m > epsilon))){
-			roots[rootsIndex] = meme;
-			rootsIndex++;
-		}
+	if(cache == undefined){
+		cache = {};
 	}
-	return roots;
+	if(cache[key] == undefined){
+		cache[key] = [];
+		let rootsIndex = 0;
+		let numbersPerInterval = (upper - lower) / intervals;
+
+		for(let i = 0; i < intervals; i++){
+			let meme = brent_alg( lower + (numbersPerInterval * i) , lower + (numbersPerInterval * (i + 1)) );
+			let m = (Math.abs(meme - cache[key][rootsIndex]));
+			let e = mu.evaluate(f, {x: meme});
+			if(!(typeof meme === 'object') && !isNaN(meme) && !(meme == undefined) && (Math.abs(e) < 0.00001 || isNaN(e)) && (isNaN(m) || (m > epsilon))){
+				cache[key][rootsIndex] = meme;
+				rootsIndex++;
+			}
+		}
+
+		localStorage.setItem("brent", JSON.stringify(cache));
+	} else {
+		console.log("localstorage hype")
+	}
+
+	mu.push();
+	return cache[key];
 }
 
 export default brent;

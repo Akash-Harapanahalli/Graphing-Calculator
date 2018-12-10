@@ -46,6 +46,10 @@ export default class Graph extends React.Component {
 
 		this.values;
 		this.p;
+
+		this.timeout;
+
+		this.selected = [];
 		// this.f_ = function(_){
 		// 	(math.eval(f, {x: (_ + this.dx)}) - math.eval(f, {x: (_ + this.dx)})) / this.dx;
 		// }
@@ -83,11 +87,10 @@ export default class Graph extends React.Component {
 		this.progress.setProgress(55);
 		this.border();
 		this.progress.setProgress(60);
-
-		console.log("boutta halt");
 	}
-	delayed(){
-		this.f_ = "((" + (this.f).replace(/x/g, ("(x + " + 0.00000001 + ")")) + ") - (" + (this.f) + ")) / " + 0.00000001;
+	delayed(_){
+		this.selected = _;
+		this.f_ = "((" + (this.f).replace(/x/g, ("(x + " + 0.01 + ")")) + ") - (" + (this.f) + ")) / " + 0.01;
 		this._f = "1 / (" + this.f + ")";
 		this.temp = this.points();
 		
@@ -390,7 +393,7 @@ export default class Graph extends React.Component {
 		return brent(this.general.x.min, this.general.x.max, 100, this.f);
 	}
 	f_zeros(){
-		return brent(this.general.x.min, this.general.x.max, 500, this.f_);
+		return brent(this.general.x.min, this.general.x.max, 200, this.f_);
 	}
 	_fzeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this._f);
@@ -432,15 +435,17 @@ export default class Graph extends React.Component {
 			let a = {};
 			a.x = this.values.inv[i];
 			a.y = math.eval(this.f, {x: a.x});
-			if(isNaN(a.y)){
-				a.type = "Hole";
-				a.y = (math.eval(this.f, {x: a.x - this.dx})).toString();
-			} else {
-				a.type = "Asymtote";
-				a.y = undefined;
+			if(!(typeof a.y === 'object')){
+				if(isNaN(a.y) ){
+					a.type = "Hole";
+					a.y = (math.eval(this.f, {x: a.x - this.dx})).toString();
+				} else {
+					a.type = "Asymtote";
+					a.y = undefined;
+				}
+				r[index] = a;
+				index++;
 			}
-			r[index] = a;
-			index++;
 		}
 
 		this.p = r;
@@ -448,7 +453,9 @@ export default class Graph extends React.Component {
 		return r;
 	}
 	label(){
-		for(let i = 0; i < this.p.length; i++){
+		let i = 0;
+		for(let j = 0; j < this.selected.length; j++){
+			i = this.selected[j];
 			if(this.p[i].type == "Asymtote"){
 				this.drawDotted({
 					strokeStyle: "#0000ff",
@@ -472,7 +479,7 @@ export default class Graph extends React.Component {
 					strokeWidth: 2,
 					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 5
 				});
-			}
+			}	
 		}
 	}
 	mousemove(e){
