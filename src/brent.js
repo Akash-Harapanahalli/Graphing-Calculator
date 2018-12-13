@@ -1,4 +1,3 @@
-import math from "mathjs";
 import Mu from "./Mu.js";
 
 const brent = (lower,upper,intervals,f) => {
@@ -83,7 +82,7 @@ const brent = (lower,upper,intervals,f) => {
 
 		localStorage.setItem("brent", JSON.stringify(cache));
 	} else {
-		console.log("localstorage hype")
+		// console.log("localstorage hype")
 	}
 
 	mu.push();

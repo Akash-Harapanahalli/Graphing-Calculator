@@ -1,7 +1,7 @@
 import React from "react";
 
-import math from "mathjs";
 import brent from "./brent.js";
+import Mu from "./Mu.js";
 
 export default class Graph extends React.Component {
 	constructor(props){
@@ -28,20 +28,11 @@ export default class Graph extends React.Component {
 	        f_: true,
 	        f__: true
 		};
-		this.cache = {};
-		// this.finds = {
-		// 	x: this.general.x.min,
-	 //        y: 0,
-	 //        prev_x: 0,
-	 //        prev_y: 0,
-	 //        dx: 0.1,
-	 //        kP: 1
-		// }
-		this.f;
-		this.dPixel = 2; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
+		this.f; this.f_; this.f__; this._f;
+		this.integral;
+		this.dPixel = 1; this.dx; this.dy; this.prev_dy; this.d2y; this.prev_d2y;
 		this.inv_dx, this.inv_dy, this.x, this.prev_x, this.y, this.prev_y;
 
-		this.f_;
 		this.temp;
 
 		this.values;
@@ -50,8 +41,10 @@ export default class Graph extends React.Component {
 		this.timeout;
 
 		this.selected = [];
+
+		this.mu = new Mu();
 		// this.f_ = function(_){
-		// 	(math.eval(f, {x: (_ + this.dx)}) - math.eval(f, {x: (_ + this.dx)})) / this.dx;
+		// 	(this.mu.evaluate(f, {x: (_ + this.dx)}) - this.mu.evaluate(f, {x: (_ + this.dx)})) / this.dx;
 		// }
 	}
 	render(){
@@ -68,14 +61,16 @@ export default class Graph extends React.Component {
 		this.container = document.getElementById(this.props.container);
 	}
 	graph(_f){
-		this.progress.setProgress(0);
+		// this.progress.setProgress(0);
+		this.mu.pull();
+
 		this.f = _f;
 		this.fullscreen();
 		try {
 			this.recalculate();
-			this.progress.setProgress(10);
+			// this.progress.setProgress(10);
 			this.plot();
-			this.progress.setProgress(50);
+			// this.progress.setProgress(50);
 			// console.log("graphed");
 
 		} catch (err){
@@ -84,22 +79,25 @@ export default class Graph extends React.Component {
 			this.border();
 		}
 		this.axes();
-		this.progress.setProgress(55);
+		// this.progress.setProgress(55);
 		this.border();
-		this.progress.setProgress(60);
+		// this.progress.setProgress(60);
 	}
 	delayed(_){
 		this.selected = _;
 		this.f_ = "((" + (this.f).replace(/x/g, ("(x + " + 0.01 + ")")) + ") - (" + (this.f) + ")) / " + 0.01;
+		this.f__ = "((" + (this.f_).replace(/x/g, ("(x + " + 0.01 + ")")) + ") - (" + (this.f_) + ")) / " + 0.01;
 		this._f = "1 / (" + this.f + ")";
 		this.temp = this.points();
 		
 		this.label();
-		this.progress.setProgress(80);
+		// this.progress.setProgress(80);
 		this.axes();
-		this.progress.setProgress(90);
+		// this.progress.setProgress(90);
 		this.border();
-		this.progress.setProgress(100);
+		// this.progress.setProgress(100);
+
+		this.mu.push();
 
 		return this.temp;
 	}
@@ -144,11 +142,10 @@ export default class Graph extends React.Component {
 		this.dPixel = _;
 	}
 	setValues(_){
-		this.dPixel = math.eval("0 + " + _.dPixel);
-		this.general.x.min = math.eval("0 + " + _.xMin);
-		this.general.x.max = math.eval("0 + " + _.xMax);
-		this.general.y.min = math.eval("0 + " + _.yMin);
-		this.general.y.max = math.eval("0 + " + _.yMax);
+		this.general.x.min = this.mu.evaluate("0 + " + _.xMin);
+		this.general.x.max = this.mu.evaluate("0 + " + _.xMax);
+		this.general.y.min = this.mu.evaluate("0 + " + _.yMin);
+		this.general.y.max = this.mu.evaluate("0 + " + _.yMax);
 		this.general.f_ = _.f_;
 		this.general.f__ = _.f__;
 	}
@@ -174,8 +171,8 @@ export default class Graph extends React.Component {
         this.x = this.general.x.min;
         this.prev_x = this.general.x.min - this.dx;
 
-        this.y = math.eval(this.f,{"x": this.x});
-        this.prev_y = math.eval(this.f, {"x": this.prev_x});
+        this.y = this.mu.evaluate(this.f,{"x": this.x});
+        this.prev_y = this.mu.evaluate(this.f, {"x": this.prev_x});
 	}
 	axes(){
 		let count = 0;
@@ -312,28 +309,14 @@ export default class Graph extends React.Component {
         });
 	}
 	plot(){
-		if(this.isEmpty(this.cache[this.f])){
-			this.cache[this.f] = {
-				meme: 0
-			};
-			// console.log("remade");
-		}
 		while(this.x < this.general.x.max){
-			if(this.cache[this.f][this.x] != undefined || this.cache[this.f][this.x]){
-            	this.y = this.cache[this.f][this.x];
-        	} else {
-        		this.y = math.eval(this.f,{"x": this.x});
-        		this.cache[this.f][this.x] = this.y;
-        		// console.log("calculated");
-			}
-			this.y = math.eval(this.f,{"x": this.x});
-			// console.log(this.y);
+			this.y = this.mu.evaluate(this.f,{"x": this.x});
 			if(this.y == undefined || !this.y || isNaN(this.y)){
 				this.y = this.general.x.min - 10;
 			}
             this.dy = this.y - this.prev_y;
-            this.d2y = this.dy - this.prev_dy;
-
+			this.d2y = this.dy - this.prev_dy;
+			
 			if((this.prev_y > this.y && this.prev_y > this.general.y.max && this.y < this.general.y.min) || (this.prev_y < this.y && this.prev_y < this.general.y.min && this.y > this.general.y.max)){
 			} else {
 				this.drawLine({
@@ -373,15 +356,7 @@ export default class Graph extends React.Component {
             this.prev_dy = this.dy;		
             this.prev_d2y = this.d2y;
             this.x += this.dx;
-        }
-        // console.log(this.cache);
-	}
-	isEmpty(obj) {
-	    for(var key in obj) {
-	        if(obj.hasOwnProperty(key))
-	            return false;
-	    }
-	    return true;
+		}
 	}
 	fullscreen(){
 		this.resize((this.container.offsetWidth - 5),
@@ -395,6 +370,9 @@ export default class Graph extends React.Component {
 	f_zeros(){
 		return brent(this.general.x.min, this.general.x.max, 200, this.f_);
 	}
+	f__zeros(){
+		return brent(this.general.x.min, this.general.x.max, 400, this.f__);
+	}
 	_fzeros(){
 		return brent(this.general.x.min, this.general.x.max, 100, this._f);
 	}
@@ -403,6 +381,7 @@ export default class Graph extends React.Component {
 		this.values = {
 			zeros: this.fzeros(),
 			crit: this.f_zeros(),
+			inf: this.f__zeros(),
 			inv: this._fzeros()
 		};
 		// console.log(this.values);
@@ -413,7 +392,7 @@ export default class Graph extends React.Component {
 			a.x = this.values.zeros[i];
 			a.y = "0";
 			a.type = "Zero";
-			let tmp = math.eval(this.f, {x: a.x});
+			let tmp = this.mu.evaluate(this.f, {x: a.x});
 			if(tmp > 0.000001 || tmp < 0.000001){
 				r[index] = a;
 				index++;
@@ -423,22 +402,56 @@ export default class Graph extends React.Component {
 		for(let i = 0; i < this.values.crit.length; i++){
 			let a = {};
 			a.x = this.values.crit[i];
-			a.y = (math.eval(this.f, {x: a.x}));
+			a.y = (this.mu.evaluate(this.f, {x: a.x}));
 			if(!isNaN(a.y)){
-				a.y = (a.y).toString();
-				a.type = "Critical Number";
-				r[index] = a;
-				index++;
+				let yp = this.mu.evaluate(this.f, {x: a.x - 0.0001});
+				let ya = this.mu.evaluate(this.f, {x: a.x + 0.0001});
+				if(a.y > yp && a.y < ya){
+					a.y = (a.y).toString();
+					a.type = "Relative Maximum";
+					r[index] = a;
+					index++;
+				} 
+				if (a.y < yp && a.y > ya){
+					a.y = (a.y).toString();
+					a.type = "Relative Minimum";
+					r[index] = a;
+					index++;
+				}
 			}
 		}
+
+		for(let i = 0; i < this.values.inf.length; i++){
+			let a = {};
+			a.x = this.values.inf[i];
+			a.y = (this.mu.evaluate(this.f, {x: a.x}));
+			if(!isNaN(a.y)){
+				let y_ =  this.mu.evaluate(this.f_, {x: a.x});
+				let y_p = this.mu.evaluate(this.f_, {x: a.x - 0.001});
+				let y_a = this.mu.evaluate(this.f_, {x: a.x + 0.001});
+				if(y_ > y_p && y_ < y_a){
+					a.y = (a.y).toString();
+					a.type = "Point of Inflection";
+					r[index] = a;
+					index++;
+				} 
+				if (y_ < y_p && y_ > y_a){
+					a.y = (a.y).toString();
+					a.type = "Point of Inflection";
+					r[index] = a;
+					index++;
+				}
+			}
+		}
+
 		for(let i = 0; i < this.values.inv.length; i++){
 			let a = {};
 			a.x = this.values.inv[i];
-			a.y = math.eval(this.f, {x: a.x});
+			a.y = this.mu.evaluate(this.f, {x: a.x});
 			if(!(typeof a.y === 'object')){
 				if(isNaN(a.y) ){
 					a.type = "Hole";
-					a.y = (math.eval(this.f, {x: a.x - this.dx})).toString();
+					a.y = (this.mu.evaluate(this.f, {x: a.x - this.dx})).toString();
 				} else {
 					a.type = "Asymtote";
 					a.y = undefined;
@@ -472,7 +485,7 @@ export default class Graph extends React.Component {
 					strokeWidth: 2,
 					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 8
 				});
-			} else if(this.p[i].type == "Critical Number" || this.p[i].type == "Zero"){
+			} else if(this.p[i].type == "Relative Maximum" || this.p[i].type == "Relative Minimum" || this.p[i].type == "Point of Inflection" || this.p[i].type == "Zero"){
 				this.drawCircle({
 					strokeStyle: "#0000ff",
 					fillStyle: "#0000ff",

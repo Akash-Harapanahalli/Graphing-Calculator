@@ -32,7 +32,6 @@ export default class XYTable extends React.Component {
 
         this.changeSelection = selection => {
             this.setState({ selection });
-            console.log(selection);
             props.onChange();
         }
     }
@@ -48,7 +47,7 @@ export default class XYTable extends React.Component {
                     >
                         <PagingState
                             defaultCurrentPage={0}
-                            pageSize={9}
+                            pageSize={5}
                         />
                         <SelectionState
                             selection={selection}

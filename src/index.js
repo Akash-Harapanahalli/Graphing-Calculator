@@ -1,10 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import MQ from "mathquill";
 import App from "./App.js";
-import math from "mathjs";
-import Mu from "./Mu.js";
-
-var mu = new Mu();
+import simpsons from "./simpsons.js";
 
 document.getElementsByTagName("body")[0].style.overflow = "hidden";
 
@@ -12,7 +10,9 @@ let app = ReactDOM.render(<App />, document.getElementById("app"));
 
 app.graph.set_dPixel(1);
 
-app.graph.progress = app.progress;
+console.log(simpsons(-10,10,10000,"x^2"));
+
+// app.graph.progress = app.progress;
 
 app.refresh = function(e) {
 	try{
@@ -23,7 +23,6 @@ app.refresh = function(e) {
 		app.graph.timeout = setTimeout(() => {
 			app.xy.refresh(app.graph.delayed(app.xy.state.selection));
 		}, 10);
-		console.log(app.xy.state);
 	} catch(err){
 		console.log(err);
 	}

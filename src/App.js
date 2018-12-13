@@ -23,6 +23,12 @@ export default class App extends React.Component {
 		};
 
 		this.points;
+		this.styles = {
+			center: {
+				marginLeft: "auto",
+				marginRight: "auto"
+			}
+		}
 	}
 	refresh(e){
 		// TO BE OVERRIDEN
@@ -30,7 +36,6 @@ export default class App extends React.Component {
 	getValues(){
 		return {
 			function: document.getElementById("function").value,
-			dPixel: document.getElementById("dPixel").value,
 			xMin: document.getElementById("xMin").value,
 			xMax: document.getElementById("xMax").value,
 			yMin: document.getElementById("yMin").value,
@@ -41,33 +46,24 @@ export default class App extends React.Component {
 	}
 	render() {
 	    return (
-	        <div styles={{backgroundColor: "black"}}> 
-	        	<ProgressBar ref={(_progress) => { this.progress = _progress; }}/>
+	        <div> 
 	        	<SplitterLayout primaryIndex={0} percentage primaryMinSize={60} onDragEnd={() => { this.refresh(); }}>
 		            <div>
 			            <div id="graphDIV">
 			            	<Graph id="graph" ref={(_graph)=>{ this.graph = _graph; }} container="graphDIV"/>
 			        	</div>
 		        	</div>
-		        	<div>
-		        		<span>
+					<div>
+						<span>
 							f(x)=
-				        	<TextField 
+							<TextField 
 				        		style={{width: '80%'}} 
 				        		id="function" 
 				        		defaultValue="sin(x)/x" 
 				        		onChange={() => { this.refresh(); }}
 				        	/>
-			        	</span>
+						</span>
 						<br/>
-						dPixel=
-						<TextField 
-							style={{width: '5%'}} 
-							id="dPixel" 
-							defaultValue="1" 
-							onChange={() => { this.refresh(); }}
-						/>
-			        	<br/>
 			        	f'(x)
 			        	<Checkbox
 			        		id="f'(x)"
@@ -103,13 +99,13 @@ export default class App extends React.Component {
 			        		<TextField
 			        			style={{width: '10%'}}
 			        			id="yMin"
-			        			defaultValue="-10"
+			        			defaultValue="-7"
 			        			onChange={() => { this.refresh(); }}
 			        		/>,
 			        		<TextField
 			        			style={{width: '10%'}}
 			        			id="yMax"
-			        			defaultValue="10"
+			        			defaultValue="7"
 			        			onChange={() => { this.refresh(); }}
 			        		/>
 			        		]
@@ -117,7 +113,7 @@ export default class App extends React.Component {
 			        	<br/>
 						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }} onChange={() => this.refresh()}></XYTable>
 						<div></div>
-		            </div>
+					</div>
 	        	</SplitterLayout>
 	        </div>
 	    );
