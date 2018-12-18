@@ -30,7 +30,11 @@ export default class Graph extends React.Component {
 	            max: 10,
 	            pixelCount: 800,
 	            origin: 500
-	        },
+			},
+			ftc: {
+				min: -10,
+				max: 10
+			},
 	        isRefreshing: true,
 	        f_: true,
 	        f__: true
@@ -126,8 +130,8 @@ export default class Graph extends React.Component {
 	integrate(){
 		// Integration! Not as portable as I would like.
 
-		let int_f_ = ("int(f'(x), " + this.general.x.min + ", " + this.general.x.max + ") = " + simpsons(this.general.x.min, this.general.x.max, 10000, this.f_));
-		let diff_f_f = ("f(" + this.general.x.max + ") - f(" + this.general.x.min + ") = " + (this.mu.evaluate(this.f, {x: this.general.x.max}) - this.mu.evaluate(this.f, {x: this.general.x.min})));
+		let int_f_ = ("int(f'(x), " + this.general.ftc.min + ", " + this.general.ftc.max + ") = " + simpsons(this.general.ftc.min, this.general.ftc.max, 10000, this.f_));
+		let diff_f_f = ("f(" + this.general.ftc.max + ") - f(" + this.general.ftc.min + ") = " + (this.mu.evaluate(this.f, {x: this.general.ftc.max}) - this.mu.evaluate(this.f, {x: this.general.ftc.min})));
 		document.getElementById('integral').textContent = "" + int_f_;
 		document.getElementById('integral2').textContent = "" + diff_f_f;
 	}
@@ -176,6 +180,8 @@ export default class Graph extends React.Component {
 		this.general.x.max = this.mu.evaluate("0 + " + _.xMax);
 		this.general.y.min = this.mu.evaluate("0 + " + _.yMin);
 		this.general.y.max = this.mu.evaluate("0 + " + _.yMax);
+		this.general.ftc.min = this.mu.evaluate("0 + " + _.ftcmin);
+		this.general.ftc.max = this.mu.evaluate("0 + " + _.ftcmax);
 		this.general.f_ = _.f_;
 		this.general.f__ = _.f__;
 	}
@@ -277,7 +283,7 @@ export default class Graph extends React.Component {
 	                x2: this.general.x.pixelCount, y2: i
 	            });
 	            if(count != 0){
-           			this.writeText((count * scalar.y), this.general.x.origin + 5, i + 13);
+           			this.writeText(-(count * scalar.y), this.general.x.origin + 5, i + 13);
            		}
         	} else {
         		this.drawLine({
@@ -299,7 +305,7 @@ export default class Graph extends React.Component {
 	                x2: this.general.x.pixelCount, y2: i
 	            });
 	            if(count != 0){
-	            	this.writeText(-(count * scalar.y), this.general.x.origin + 5, i + 13);
+	            	this.writeText((count * scalar.y), this.general.x.origin + 5, i + 13);
 	        	}
         	} else {
         		this.drawLine({
@@ -530,13 +536,27 @@ export default class Graph extends React.Component {
 					strokeWidth: 2,
 					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 8
 				});
-			} else if(this.p[i].type == "Relative Maximum" || this.p[i].type == "Relative Minimum" || this.p[i].type == "Point of Inflection" || this.p[i].type == "Zero"){
+			} else if(this.p[i].type == "Relative Maximum" || this.p[i].type == "Relative Minimum"  ){
+				this.drawCircle({
+					strokeStyle: "#ff0000",
+					fillStyle: "#ff0000",
+					strokeWidth: 2,
+					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 5
+				});
+			} else if (this.p[i].type == "Zero"){
 				this.drawCircle({
 					strokeStyle: "#0000ff",
 					fillStyle: "#0000ff",
 					strokeWidth: 2,
 					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 5
 				});
+			} else if (this.p[i].type == "Point of Inflection"){
+				this.drawCircle({
+					strokeStyle: "#00ff00",
+					fillStyle: "#00ff00",
+					strokeWidth: 2,
+					x: this.p[i].x * this.inv_dx + this.general.x.origin, y: this.p[i].y * -this.inv_dy + this.general.y.origin, radius: 5
+				})
 			}	
 		}
 	}

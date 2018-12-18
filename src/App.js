@@ -57,6 +57,8 @@ export default class App extends React.Component {
 			xMax: document.getElementById("xMax").value,
 			yMin: document.getElementById("yMin").value,
 			yMax: document.getElementById("yMax").value,
+			ftcmin: document.getElementById("ftcmin").value,
+			ftcmax: document.getElementById("ftcmax").value,
 			f_: this.buttons.f_,
 			f__: this.buttons.f__
 		}
@@ -133,6 +135,21 @@ export default class App extends React.Component {
 						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }} onChange={() => this.refresh()}></XYTable>
 						<br/>
 						<Button bsStyle="warning" onClick={() => {this.graph.integrate()}}>Integrate f'(x) on the Domain</Button>
+						<br/>
+						Integrate on: [ 
+						<TextField
+							style={{width: '10%'}}
+							id="ftcmin"
+							defaultValue="-10"
+							onChange={() => { this.refresh(); }}
+						/>,
+						<TextField
+							style={{width: '10%'}}
+							id="ftcmax"
+							defaultValue="10"
+							onChange={() => { this.refresh(); }}
+						/>
+						]
 						<br/>
 						<span id="integral"></span>
 						<br/>
