@@ -1,5 +1,7 @@
 import Mu from './Mu.js';
 
+// Simpson's rule implemented, following the formula.
+
 const simpsons = (lower, upper, intervals, f) => {
     let mu = new Mu();
     let dx = (upper - lower) / intervals;

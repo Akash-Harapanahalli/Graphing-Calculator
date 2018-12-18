@@ -3,14 +3,17 @@ import SplitterLayout from "react-splitter-layout";
 // import Button from "@material-ui/core/Button";
 import {Button, ButtonGroup} from "react-bootstrap/lib";
 import TextField from "@material-ui/core/TextField";
-import InputGroup from "react-bootstrap/lib/InputGroup"
-import Checkbox from "@material-ui/core/Checkbox";
-// import Checkbox from "react-bootstrap/lib/Checkbox"
 
 import Graph from "./Graph.js";
 import ProgressBar from "./ProgressBar.js"
 import XYTable from "./XYTable.js";
 import color from "@material-ui/core/colors/indigo";
+
+/**
+ * The GUI!
+ * Uses Material UI and Bootstrap (but still looks not as good as it could :( )
+ * react-splitter-layout splits the input area from the graph.
+ */
 
 export default class App extends React.Component {
 	constructor(props){

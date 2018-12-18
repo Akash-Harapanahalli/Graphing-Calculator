@@ -30,6 +30,8 @@ app.refresh = function(e) {
 
 app.refresh();
 
+// These following listeners are handled in the global scope so that app.refresh() can be called in some of them.
+
 app.graph.mouseDown = function(e){
 	app.graph.captureMouseDown(e, app.boxes);
 }

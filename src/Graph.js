@@ -4,6 +4,12 @@ import brent from "./brent.js";
 import simpsons from "./simpsons.js";
 import Mu from "./Mu.js";
 
+/**
+ * A hand-written Graph elemnent!
+ * Graphs axes, lines, function, 2 derivatives out, and more.
+ * Makes calls to brent, mu, and simpsons.
+ */
+
 export default class Graph extends React.Component {
 	constructor(props){
 		super(props);
@@ -57,20 +63,15 @@ export default class Graph extends React.Component {
 			},
 			isDown: false
 		}
-		// this.f_ = function(_){
-		// 	(this.mu.evaluate(f, {x: (_ + this.dx)}) - this.mu.evaluate(f, {x: (_ + this.dx)})) / this.dx;
-		// }
 	}
 	render(){
 		return (
-			<div onScroll = {(e) => {this.scroll(e)}}>
-				<canvas 
-					id={this.props.id}
-					onMouseDown={(e) => {this.mouseDown(e)}}
-					onMouseUp={(e) => {this.mouseUp(e)}}
-					onMouseMove={(e) => {this.mouseMove(e)}}
-				/>
-			</div>
+			<canvas 
+				id={this.props.id}
+				onMouseDown={(e) => {this.mouseDown(e)}}
+				onMouseUp={(e) => {this.mouseUp(e)}}
+				onMouseMove={(e) => {this.mouseMove(e)}}
+			/>
 		);
 	}
 	componentDidMount(){
@@ -83,7 +84,6 @@ export default class Graph extends React.Component {
 			return false; 
 		}, false);	}
 	graph(_f){
-		// this.progress.setProgress(0);
 		this.mu.pull();
 		document.getElementById('integral').textContent = "";
 		document.getElementById('integral2').textContent = "";
@@ -95,42 +95,37 @@ export default class Graph extends React.Component {
 		this.fullscreen();
 		try {
 			this.recalculate();
-			// this.progress.setProgress(10);
 			this.plot();
-			// this.progress.setProgress(50);
-			// console.log("graphed");
-
 		} catch (err){
 			console.log(err);
 			this.axes();
 			this.border();
 		}
 		this.axes();
-		// this.progress.setProgress(55);
 		this.border();
-		// this.progress.setProgress(60);
 	}
 	delayed(_){
-		this.selected = _;
-		this.f_ = "((" + (this.f).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f) + ")) / 0.01";
-		this.f__ = "((" + (this.f_).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f_) + ")) / 0.01";
-		this._f = "1 / (" + this.f + ")";
-		this.temp = this.points();
-		
-		this.label();
-		// this.progress.setProgress(80);
-		this.axes();
-		// this.progress.setProgress(90);
-		this.border();
-		// this.progress.setProgress(100);
+		if(!this.drag.isDown){
+			this.selected = _;
+			this.f_ = "((" + (this.f).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f) + ")) / 0.01";
+			this.f__ = "((" + (this.f_).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f_) + ")) / 0.01";
+			this._f = "1 / (" + this.f + ")";
+			this.temp = this.points();
+			
+			this.label();
+			this.axes();
+			this.border();
 
+			this.mu.push();
+			return this.temp;
+		} else {
+			return [];
+		}
 
-		this.mu.push();
-
-		return this.temp;
 	}
 	integrate(){
-		console.log("INTEGRATING");
+		// Integration! Not as portable as I would like.
+
 		let int_f_ = ("int(f'(x), " + this.general.x.min + ", " + this.general.x.max + ") = " + simpsons(this.general.x.min, this.general.x.max, 10000, this.f_));
 		let diff_f_f = ("f(" + this.general.x.max + ") - f(" + this.general.x.min + ") = " + (this.mu.evaluate(this.f, {x: this.general.x.max}) - this.mu.evaluate(this.f, {x: this.general.x.min})));
 		document.getElementById('integral').textContent = "" + int_f_;
@@ -196,7 +191,6 @@ export default class Graph extends React.Component {
         this.general.y.origin = ((this.general.y.max) / (this.general.y.max - this.general.y.min)) * (this.general.y.pixelCount);
 
 		this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
-		// console.log("dx = " + this.dx);
         this.dy = (this.dPixel * (this.general.y.max - this.general.y.min)) / this.general.y.pixelCount;
         this.canvdy = this.dy;
         this.prev_dy = this.dy;
@@ -365,6 +359,7 @@ export default class Graph extends React.Component {
             this.dy = this.y - this.prev_y;
 			this.d2y = this.dy - this.prev_dy;
 			
+			// PLOTTING THE FUNCTION!
 			if((this.prev_y > this.y && this.prev_y > this.general.y.max && this.y < this.general.y.min) || (this.prev_y < this.y && this.prev_y < this.general.y.min && this.y > this.general.y.max)){
 			} else {
 				this.drawLine({
@@ -375,6 +370,7 @@ export default class Graph extends React.Component {
 				});
 			}
 
+			// PLOTTING THE DERIVATIVE!
             if(this.general.f_ && this.y != undefined && typeof this.y !== "object"){
 				if((this.prev_dy > this.dy && this.prev_dy > this.general.y.max && this.dy < this.general.y.min) || (this.prev_dy < this.dy && this.prev_dy < this.general.y.min && this.dy > this.general.y.max)){
 				} else {
@@ -387,6 +383,7 @@ export default class Graph extends React.Component {
 				}
             }
 
+			// PLOTTING THE SECOND DERIVATIVE!
             if(this.general.f__){
 				if((this.prev_d2y > this.d2y && this.prev_d2y > this.general.y.max && this.d2y < this.general.y.min) || (this.prev_d2y < this.d2y && this.prev_d2y < this.general.y.min && this.d2y > this.general.y.max)){
 				} else {
@@ -430,7 +427,7 @@ export default class Graph extends React.Component {
 			zeros: this.fzeros(),
 			crit: this.f_zeros(),
 			inf: this.f__zeros(),
-			inv: this._fzeros()
+			rec: this._fzeros()
 		};
 		// console.log(this.values);
 
@@ -492,16 +489,16 @@ export default class Graph extends React.Component {
 			}
 		}
 
-		for(let i = 0; i < this.values.inv.length; i++){
+		for(let i = 0; i < this.values.rec.length; i++){
 			let a = {};
-			a.x = this.values.inv[i];
+			a.x = this.values.rec[i];
 			a.y = this.mu.evaluate(this.f, {x: a.x});
 			if(!(typeof a.y === 'object')){
 				if(isNaN(a.y) ){
 					a.type = "Hole";
-					a.y = (this.mu.evaluate(this.f, {x: a.x - this.dx})).toString();
+					a.y = (this.mu.evaluate(this.f, {x: a.x - 0.01})).toString();
 				} else {
-					a.type = "Asymtote";
+					a.type = "Asymptote";
 					a.y = undefined;
 				}
 				r[index] = a;
@@ -517,7 +514,7 @@ export default class Graph extends React.Component {
 		let i = 0;
 		for(let j = 0; j < this.selected.length; j++){
 			i = this.selected[j];
-			if(this.p[i].type == "Asymtote"){
+			if(this.p[i].type == "Asymptote"){
 				this.drawDotted({
 					strokeStyle: "#0000ff",
 					strokeWidth: 3,
@@ -580,9 +577,9 @@ export default class Graph extends React.Component {
 		}
 	}
 
-	// Event Captures to be overriden.
+	// Event Captures to be overriden in a broader scope.
 	mouseDown(e){}
 	mouseUp(e){}
 	mouseMove(e){}
-	scroll(e){console.log(e)}
+	scroll(e){}
 };

@@ -1,5 +1,10 @@
 import math from "mathjs"
 
+/**
+ * A wrapper for math.js.
+ * Uses Memoization to simplify calculations, storing inputs and outputs as JSON objects in localStorage.
+ */
+
 export default class Mu {
     constructor(){
         this.cache;

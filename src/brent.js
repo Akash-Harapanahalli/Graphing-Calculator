@@ -1,5 +1,12 @@
 import Mu from "./Mu.js";
 
+/**
+ * Dare I say, the backbone of the calculator's many functions.
+ * Fast, robust, reliable, zero solving calculator.
+ * Combines the Bisection method, Secant Method, and Inverse Quadratic Interpolation.
+ * Uses memoization (same as Mu) to simplify calculations when the same parameters are called multiple times.
+ */
+
 const brent = (lower,upper,intervals,f) => {
 
 	let mu = new Mu();
@@ -65,7 +72,7 @@ const brent = (lower,upper,intervals,f) => {
 	if(cache == undefined){
 		cache = {};
 	}
-	if(cache[key] == undefined){
+	if(cache[key] == undefined){ // else in localStorage already!
 		cache[key] = [];
 		let rootsIndex = 0;
 		let numbersPerInterval = (upper - lower) / intervals;
@@ -81,9 +88,7 @@ const brent = (lower,upper,intervals,f) => {
 		}
 
 		localStorage.setItem("brent", JSON.stringify(cache));
-	} else {
-		// console.log("localstorage hype")
-	}
+	} 
 
 	mu.push();
 	return cache[key];
