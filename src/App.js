@@ -1,13 +1,15 @@
 import React from "react";
 import SplitterLayout from "react-splitter-layout";
-import Button from "@material-ui/core/Button";
+// import Button from "@material-ui/core/Button";
+import {Button, ButtonGroup} from "react-bootstrap/lib";
 import TextField from "@material-ui/core/TextField";
+import InputGroup from "react-bootstrap/lib/InputGroup"
 import Checkbox from "@material-ui/core/Checkbox";
+// import Checkbox from "react-bootstrap/lib/Checkbox"
 
 import Graph from "./Graph.js";
 import ProgressBar from "./ProgressBar.js"
 import XYTable from "./XYTable.js";
-import MathInput from "./MathInput.js";
 import color from "@material-ui/core/colors/indigo";
 
 export default class App extends React.Component {
@@ -29,6 +31,18 @@ export default class App extends React.Component {
 				marginRight: "auto"
 			}
 		}
+		
+		this.buttons = {
+			f_: false,
+			f__: false
+		}
+
+		this.boxes = {
+			xMin: "xMin",
+			xMax: "xMax",
+			yMin: "yMin",
+			yMax: "yMax"
+		}
 	}
 	refresh(e){
 		// TO BE OVERRIDEN
@@ -40,14 +54,14 @@ export default class App extends React.Component {
 			xMax: document.getElementById("xMax").value,
 			yMin: document.getElementById("yMin").value,
 			yMax: document.getElementById("yMax").value,
-			f_: document.getElementById("f'(x)").checked,
-			f__: document.getElementById("f''(x)").checked
+			f_: this.buttons.f_,
+			f__: this.buttons.f__
 		}
 	}
 	render() {
 	    return (
 	        <div> 
-	        	<SplitterLayout primaryIndex={0} percentage primaryMinSize={60} onDragEnd={() => { this.refresh(); }}>
+	        	<SplitterLayout primaryIndex={0} percentage primaryMinSize={60} onSecondaryPaneSizeChange={() => {this.graph.dPixel = 2; this.refresh();}} onDragEnd={() => { this.graph.dPixel = 1; this.refresh(); }}>
 		            <div>
 			            <div id="graphDIV">
 			            	<Graph id="graph" ref={(_graph)=>{ this.graph = _graph; }} container="graphDIV"/>
@@ -64,19 +78,12 @@ export default class App extends React.Component {
 				        	/>
 						</span>
 						<br/>
-			        	f'(x)
-			        	<Checkbox
-			        		id="f'(x)"
-			        		onChange={() => { this.refresh(); }}
-			        		defaultChecked={false}
-						/>
-			        	f''(x)
-			        	<Checkbox
-			        		id="f''(x)"
-			        		onChange={() => { this.refresh(); }}
-			        		defaultChecked={false}
-			        	/>
-			        	<br/>
+						<ButtonGroup style={{width: '100%'}}>
+							<Button bsStyle="danger" onClick={() => {this.buttons.f_ = !this.buttons.f_; this.refresh();}} active={this.buttons.f_}>f'(x)</Button>
+							<Button bsStyle="success" onClick={() => {this.buttons.f__ = !this.buttons.f__; this.refresh();}} active={this.buttons.f__}>f''(x)</Button>
+						</ButtonGroup>
+						<br/>
+						<br/>
 			        	<span>
 			        		D: [ 
 			        		<TextField
@@ -110,9 +117,23 @@ export default class App extends React.Component {
 			        		/>
 			        		]
 			        	</span>
+						<br/>
+						<Button bsStyle="warning" onClick={() => {
+							document.getElementById("xMin").value = "-10";
+							document.getElementById("xMax").value = "10";
+							document.getElementById("yMin").value = "-7";
+							document.getElementById("yMax").value = "7";
+							this.refresh();
+						}}>Standard View </Button>
+			        	<br/>
 			        	<br/>
 						<XYTable id="xy" ref={(_xy)=>{ this.xy = _xy; }} onChange={() => this.refresh()}></XYTable>
-						<div></div>
+						<br/>
+						<Button bsStyle="warning" onClick={() => {this.graph.integrate()}}>Integrate f'(x) on the Domain</Button>
+						<br/>
+						<span id="integral"></span>
+						<br/>
+						<span id="integral2"></span>
 					</div>
 	        	</SplitterLayout>
 	        </div>

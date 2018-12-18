@@ -1,6 +1,7 @@
 import React from "react";
 
 import brent from "./brent.js";
+import simpsons from "./simpsons.js";
 import Mu from "./Mu.js";
 
 export default class Graph extends React.Component {
@@ -43,26 +44,52 @@ export default class Graph extends React.Component {
 		this.selected = [];
 
 		this.mu = new Mu();
+
+		this.drag = {
+			init: {
+				x: 0,
+				y: 0,
+				boxes: {}
+			},
+			during: {
+				x: 0,
+				y: 0
+			},
+			isDown: false
+		}
 		// this.f_ = function(_){
 		// 	(this.mu.evaluate(f, {x: (_ + this.dx)}) - this.mu.evaluate(f, {x: (_ + this.dx)})) / this.dx;
 		// }
 	}
 	render(){
 		return (
-			<canvas 
-				id={this.props.id}
-				onMouseMove={this.mousemove}
-			/>
+			<div onScroll = {(e) => {this.scroll(e)}}>
+				<canvas 
+					id={this.props.id}
+					onMouseDown={(e) => {this.mouseDown(e)}}
+					onMouseUp={(e) => {this.mouseUp(e)}}
+					onMouseMove={(e) => {this.mouseMove(e)}}
+				/>
+			</div>
 		);
 	}
 	componentDidMount(){
 		this.canvas = document.getElementById(this.props.id);
 		this.ctx = this.canvas.getContext('2d');
 		this.container = document.getElementById(this.props.container);
-	}
+		let ctx = this;
+		this.canvas.addEventListener('wheel',function(e){
+			ctx.scroll(e);
+			return false; 
+		}, false);	}
 	graph(_f){
 		// this.progress.setProgress(0);
 		this.mu.pull();
+		document.getElementById('integral').textContent = "";
+		document.getElementById('integral2').textContent = "";
+
+		if(this.drag.isDown) this.dPixel = 2;
+		else this.dPixel = 1;
 
 		this.f = _f;
 		this.fullscreen();
@@ -85,8 +112,8 @@ export default class Graph extends React.Component {
 	}
 	delayed(_){
 		this.selected = _;
-		this.f_ = "((" + (this.f).replace(/x/g, ("(x + " + 0.01 + ")")) + ") - (" + (this.f) + ")) / " + 0.01;
-		this.f__ = "((" + (this.f_).replace(/x/g, ("(x + " + 0.01 + ")")) + ") - (" + (this.f_) + ")) / " + 0.01;
+		this.f_ = "((" + (this.f).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f) + ")) / 0.01";
+		this.f__ = "((" + (this.f_).replace(/x/g, ("(x + 0.01)")) + ") - (" + (this.f_) + ")) / 0.01";
 		this._f = "1 / (" + this.f + ")";
 		this.temp = this.points();
 		
@@ -97,9 +124,17 @@ export default class Graph extends React.Component {
 		this.border();
 		// this.progress.setProgress(100);
 
+
 		this.mu.push();
 
 		return this.temp;
+	}
+	integrate(){
+		console.log("INTEGRATING");
+		let int_f_ = ("int(f'(x), " + this.general.x.min + ", " + this.general.x.max + ") = " + simpsons(this.general.x.min, this.general.x.max, 10000, this.f_));
+		let diff_f_f = ("f(" + this.general.x.max + ") - f(" + this.general.x.min + ") = " + (this.mu.evaluate(this.f, {x: this.general.x.max}) - this.mu.evaluate(this.f, {x: this.general.x.min})));
+		document.getElementById('integral').textContent = "" + int_f_;
+		document.getElementById('integral2').textContent = "" + diff_f_f;
 	}
 	resize(_width, _height){
 		this.canvas.width = _width;
@@ -163,6 +198,7 @@ export default class Graph extends React.Component {
 		this.dx = (this.dPixel * (this.general.x.max - this.general.x.min)) / this.general.x.pixelCount;
 		// console.log("dx = " + this.dx);
         this.dy = (this.dPixel * (this.general.y.max - this.general.y.min)) / this.general.y.pixelCount;
+        this.canvdy = this.dy;
         this.prev_dy = this.dy;
 
         this.inv_dx = this.dPixel/this.dx;
@@ -177,9 +213,21 @@ export default class Graph extends React.Component {
 	axes(){
 		let count = 0;
 		let scalar = {
-			x: Math.ceil(( (this.general.x.max - this.general.x.min) * 50 ) / this.canvas.width),
-			y: Math.ceil(( (this.general.y.max - this.general.y.min) * 50 ) / this.canvas.height)
+			x: ( (this.general.x.max - this.general.x.min) * 50 ) / this.canvas.width,
+			y: ( (this.general.y.max - this.general.y.min) * 50 ) / this.canvas.height
 		}
+		if(scalar.x <= 0.5){
+			let m = scalar.x;
+			let _m = 1 / m;
+			_m = Math.ceil(_m);
+			scalar.x = 1 / _m;
+		} else scalar.x = Math.ceil(scalar.x);
+		if(scalar.y <= 0.5){
+			let m = scalar.y;
+			let _m = 1 / m;
+			_m = Math.ceil(_m);
+			scalar.y = 1 / _m;
+		} else scalar.y = Math.ceil(scalar.y);
 		let pixels = {
 			x: this.inv_dx * scalar.x,
 			y: this.inv_dy * scalar.y
@@ -495,7 +543,46 @@ export default class Graph extends React.Component {
 			}	
 		}
 	}
-	mousemove(e){
-		// TO BE OVERRIDDEN
+
+	captureMouseDown(e, boxes){
+		this.drag.init.x = e.clientX;
+		this.drag.init.y = e.clientY;	
+		this.drag.during.x = e.clientX;
+		this.drag.during.y = e.clientY;
+		this.drag.init.boxes.xMin = this.mu.evaluate(document.getElementById(boxes.xMin).value);
+		this.drag.init.boxes.xMax = this.mu.evaluate(document.getElementById(boxes.xMax).value);
+		this.drag.init.boxes.yMin = this.mu.evaluate(document.getElementById(boxes.yMin).value);
+		this.drag.init.boxes.yMax = this.mu.evaluate(document.getElementById(boxes.yMax).value);
+		this.drag.isDown = true;
 	}
+	captureMouseUp(e){
+		this.drag.isDown = false;
+	}
+	captureMouseMove(e, boxes){
+		this.drag.during.x = e.clientX;
+		this.drag.during.y = e.clientY;
+		let delta_x = (this.drag.init.x - this.drag.during.x) * this.dx / 2;
+		let delta_y = (this.drag.init.y - this.drag.during.y) * this.canvdy / 2;
+		document.getElementById(boxes.xMin).value = this.mu.evaluate(this.drag.init.boxes.xMin + delta_x);
+		document.getElementById(boxes.xMax).value = this.mu.evaluate(this.drag.init.boxes.xMax + delta_x);
+		document.getElementById(boxes.yMin).value = this.mu.evaluate(this.drag.init.boxes.yMin - delta_y);
+		document.getElementById(boxes.yMax).value = this.mu.evaluate(this.drag.init.boxes.yMax - delta_y);
+	}
+	captureScroll(e, boxes){
+		let deltaY = -e.deltaY;
+		console.log(deltaY);
+
+		if(Math.abs(deltaY) > 10){
+			document.getElementById(boxes.xMin).value = this.mu.evaluate(document.getElementById(boxes.xMin).value) * (1 + deltaY / 1000);
+			document.getElementById(boxes.xMax).value = this.mu.evaluate(document.getElementById(boxes.xMax).value) * (1 + deltaY / 1000);
+			document.getElementById(boxes.yMin).value = this.mu.evaluate(document.getElementById(boxes.yMin).value) * (1 + deltaY / 1000);
+			document.getElementById(boxes.yMax).value = this.mu.evaluate(document.getElementById(boxes.yMax).value) * (1 + deltaY / 1000);
+		}
+	}
+
+	// Event Captures to be overriden.
+	mouseDown(e){}
+	mouseUp(e){}
+	mouseMove(e){}
+	scroll(e){console.log(e)}
 };

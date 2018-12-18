@@ -10,9 +10,9 @@ const simpsons = (lower, upper, intervals, f) => {
     integral += mu.evaluate(f, {x: upper});
 
     for(let i = lower + dx; i <= upper - dx; i+=dx){
-        integral += mult * mu.evaluate(f, {x: i});
         if(mult == 4) mult = 2;
         else mult = 4;
+        integral += mult * mu.evaluate(f, {x: i});
     }
 
     return (dx * integral / 3);
