@@ -1,0 +1,61 @@
+{
+  "name": "Graphing-Calculator",
+  "version": "1.0.0",
+  "description": "Graphing-Calculator",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode development --open",
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Akash-Harapanahalli/Graphing-Calculator.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Akash-Harapanahalli/Graphing-Calculator/issues"
+  },
+  "homepage": "https://github.com/Akash-Harapanahalli/Graphing-Calculator#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.5",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "css-loader": "^1.0.1",
+    "file-loader": "^2.0.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "mini-css-extract-plugin": "^0.4.2",
+    "react": "^16.4.2",
+    "react-dom": "^16.4.2",
+    "style-loader": "^0.23.1",
+    "url-loader": "^1.1.2",
+    "webpack": "^4.17.1",
+    "webpack-cli": "^3.1.0",
+    "webpack-dev-server": "^3.1.10"
+  },
+  "dependencies": {
+    "@devexpress/dx-react-core": "^1.8.0",
+    "@devexpress/dx-react-grid": "^1.8.0",
+    "@devexpress/dx-react-grid-material-ui": "^1.8.0",
+    "@material-ui/core": "^1.5.1",
+    "@material-ui/icons": "^3.0.1",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "bootstrap": "^4.1.3",
+    "classnames": "^2.2.6",
+    "extract-text-webpack-plugin": "^3.0.2",
+    "jquery": "^3.3.1",
+    "loader-runner": "^2.3.1",
+    "mathjs": "^5.1.1",
+    "node-mathquill": "^0.10.2",
+    "react-bootstrap": "^0.32.4",
+    "react-hot-loader": "^4.3.12",
+    "react-inline-grid": "^0.5.3",
+    "react-mathquill": "^0.1.3",
+    "react-splitter-layout": "^3.0.1"
+  }
+}
